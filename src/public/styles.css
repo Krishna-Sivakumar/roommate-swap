@@ -1,0 +1,144 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap");
+
+:root {
+  --background-color: #113;
+  --link-color: rgb(94, 149, 252);
+  --text-color: white;
+  --hr-color: #5f6368;
+  --card-shadow: #5f6368;
+}
+
+[data-theme="light"] {
+  --background-color: beige;
+  --link-color: rgb(94, 149, 252);
+  --text-color: #111;
+  --hr-color: #555;
+  --card-shadow: rgba(0,0,0,0.3);
+}
+
+body {
+  margin: 3.5rem auto;
+  max-width: 45rem;
+  font-family: "Courier New", Courier, monospace;
+  height: fit-content;
+
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+hr {
+  border: 1px solid var(--hr-color);
+}
+
+h1 {
+  font-size: 2.5rem;
+}
+
+p {
+  font-size: 1rem;
+}
+
+a {
+  color: var(--link-color);
+  text-decoration: none;
+}
+
+@keyframes fadein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/*For Phones*/
+@media (max-width: 680px) {
+  body {
+    max-width: 20rem;
+  }
+}
+
+/*For Tablets*/
+@media (max-width: 809px) and (min-width: 681px) {
+  body {
+    max-width: 31rem;
+  }
+}
+
+.card {
+  padding: 0.5rem;
+  padding-top: 0;
+  border: 1px solid #5f6368;
+  margin: 1rem;
+  border-radius: 5px;
+  width: inherit;
+  height: fit-content;
+  background: transparent;
+
+  box-shadow: 2px 2px 0px 0px var(--card-shadow);
+}
+
+input, select {
+  border: 1px solid #5f6368;
+  border-radius: 5px;
+  background-color: transparent;
+  color: var(--text-color);
+
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.card a {
+  color: var(--link-color);
+  text-decoration: none;
+}
+
+.tag {
+  border: 1px solid #5f6368;
+  border-radius: 10%;
+  color: white;
+  background: none;
+  font-family: "Courier New", Courier, monospace;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  margin-top: 0.5em;
+  padding: 0.2rem;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+#clip {
+  /* gradient courtesy of cssgradient.io */
+  background: rgb(237,105,0);
+  background: linear-gradient(90deg, rgba(237,105,0,1) 0%, rgba(217,0,0,1) 50%, rgba(144,0,115,1) 100%);
+  width: fit-content;
+
+  text-shadow: 0 0 3px rgba(0,0,0,0.2);
+
+  font-weight: bold;
+  
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+#color-switch {
+  position: absolute;
+  top: 0.5em;
+  right: 0.5em;
+
+  font-size: 2em;
+  text-shadow: 0 0 10px black;
+  border-radius: 100%;
+
+  user-select: none;
+  cursor: pointer;
+}
+
+#color-switch:active {
+  text-shadow: 0 0 1px black;
+}
