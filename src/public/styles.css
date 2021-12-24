@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap');
 
 :root {
   --background-color: #113;
@@ -6,6 +6,7 @@
   --text-color: white;
   --hr-color: #5f6368;
   --card-shadow: #5f6368;
+  --font: 'Atkinson Hyperlegible', sans-serif;
 }
 
 [data-theme="light"] {
@@ -19,7 +20,7 @@
 body {
   margin: 3.5rem auto;
   max-width: 45rem;
-  font-family: "Courier New", Courier, monospace;
+  font-family: var(--font);
   height: fit-content;
 
   background-color: var(--background-color);
@@ -85,7 +86,7 @@ input, select {
   background-color: transparent;
   color: var(--text-color);
 
-  font-family: 'Courier New', Courier, monospace;
+  font-family: var(--font);
 }
 
 .card a {
@@ -98,7 +99,7 @@ input, select {
   border-radius: 10%;
   color: white;
   background: none;
-  font-family: "Courier New", Courier, monospace;
+  font-family:  var(--font);
   text-transform: uppercase;
   font-size: 0.7rem;
   margin-top: 0.5em;
@@ -132,7 +133,7 @@ input, select {
   right: 0.5em;
 
   font-size: 2em;
-  text-shadow: 0 0 10px black;
+  text-shadow: 2px 2px 0px var(--card-shadow);
   border-radius: 100%;
 
   user-select: none;
@@ -140,5 +141,5 @@ input, select {
 }
 
 #color-switch:active {
-  text-shadow: 0 0 1px black;
+  text-shadow: 0 0 1px var(--card-shadow);
 }

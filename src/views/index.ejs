@@ -1,20 +1,42 @@
+<!DOCTYPE HTML>
 <html>
     <head>
         <title>home</title>
         <link href="styles.css" rel="stylesheet"/>
         <script>
+            document.onreadystatechange = function(e) {
+                let body = document.getElementsByTagName("body")[0];
+                const theme = window.sessionStorage.getItem("theme");
+                if (theme == null) {
+                    window.sessionStorage.setItem("theme", "light");
+                } else {
+                    body.setAttribute("data-theme", theme);
+                }
+            };
+
             window.onload = () => {
                 document.getElementById("color-switch").addEventListener("click", () => {
                     let body = document.getElementsByTagName("body")[0];
-                    const theme = body.getAttribute("data-theme");
-                    body.setAttribute("data-theme", (theme === "dark")? "light" : "dark");
+                    const theme = window.sessionStorage.getItem("theme");
+                    if (theme == null) {
+                        body.setAttribute("data-theme", "light");
+                        window.sessionStorage.setItem("theme", "light");
+                    }
+                    else {
+                        body.setAttribute("data-theme", (theme === "dark")? "light" : "dark");
+                        window.sessionStorage.setItem("theme", (theme === "dark")? "light" : "dark");
+                    }
                 })
             }
         </script>
     </head>
-    <body data-theme="dark">
-        <h1 id="clip">RoomSwap</h1>
-        <a href="<%= authLink %>">Login with Google</a>
+    <body data-theme="light">
+        <h1 id="clip">RoomSwap 𝛼</h1>
+        <% if (!user.loggedIn) { %>
+            <a href="<%= authLink %>">Login with Google</a>
+        <% } else {%>
+            <p>Hey <b><%= user.name %></b>! ● <a href="/logout">Logout</a></p>
+        <% } %>
         <hr>
         <form method="get">
             <label for="room_no">Room No:</label>

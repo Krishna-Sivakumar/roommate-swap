@@ -1,7 +1,7 @@
 {
   "name": "roommate-swap",
   "version": "1.0.0",
-  "description": "a webapp to help vit students swap hostel roommates",
+  "description": "A webapp to help vit students swap hostel rooms.",
   "main": "index.js",
   "scripts": {
     "build": "tsc",
@@ -11,15 +11,20 @@
   "author": "krishnasivaprogrammer@gmail.com",
   "license": "MIT",
   "dependencies": {
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "ejs": "^3.1.6",
     "express": "^4.17.2",
     "express-session": "^1.17.2",
+    "google-auth-library": "^7.11.0",
+    "googleapis": "^92.0.0",
     "package.json": "^2.0.1",
-    "passport": "^0.5.2",
-    "passport-google-oidc": "^0.1.0",
     "querystring": "^0.2.1",
     "sqlite": "^4.0.23",
     "sqlite3": "^5.0.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.13",
+    "@types/sqlite3": "^3.1.8"
   }
 }
