@@ -24,6 +24,18 @@ const authenticatedClient: OAuth2Client = new OAuth2Client(
     config.redirectURIs[0]
 );
 
+async function ensureDB(uri: string) {
+    /*
+        Creates a new database file and initializes tables in case they don't exist.
+    */
+    let db = await sqlite.open({
+        filename: uri,
+        driver: sqlite3.Database
+    })
+
+    db.exec("CREATE TABLE IF NOT EXISTS rooms(email TEXT PRIMARY KEY, room_no INTEGER, size INTEGER, ac INTEGER, swap INT DEFAULT 0);");
+}
+
 async function queryRooms(db: sqlite.Database, query): Promise<any[]> {
     const ac = escape(query.ac);
     const size = escape(query.size);
@@ -118,5 +130,7 @@ app.get("/logout", async function logout(req, res) {
 })
 
 let PORT = process.env.PORT || 4000;
+
+ensureDB("database.db");
 
 app.listen(PORT, () => console.log(`listening on port ${PORT}`));
