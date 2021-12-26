@@ -13,7 +13,7 @@ app.set("view engine", "ejs");
 app.use(cookieParser())
 app.use(express.static("./public"));
 
-let dbPormise = sqlite.open({
+let dbPromise = sqlite.open({
     filename: "./database.db",
     driver: sqlite3.Database
 })
@@ -43,6 +43,11 @@ async function queryRooms(db: sqlite.Database, query): Promise<any[]> {
     const room_no = `%${escape(query.room_no)}%`;
 
     return db.all("select size, room_no, email from rooms where room_no like ? and size=?", room_no, size);
+}
+
+async function firstLogin(db: sqlite.Database, email: string): Promise<Boolean> {
+    let row = await db.get("SELECT size, ac FROM rooms WHERE email = ?", email);
+    return !(row.size != null && row.ac != null);
 }
 
 async function setSwap(db: sqlite.Database, query) {
@@ -96,6 +101,7 @@ app.get('/', async function home(req, res) {
             name: name
         },
         authLink: authURL,
+        firstLogin: await firstLogin(db, req.cookies.EM),
         rows: await queryRooms(db, req.query),
         ava: await getAvailableRooms(db),
         size: req.query.size,
@@ -118,13 +124,16 @@ app.get("/auth/google", async function login(req, res) {
     // Get userinfo from googleapis
     let getter = google.oauth2({ auth: authenticatedClient, version: "v2" })
     let response = await getter.userinfo.get({});
-    console.log(authenticatedClient.credentials);
 
     // Set relevant cookies
     res.cookie("EM", response.data.email, { httpOnly: true });
     res.cookie("NM", response.data.given_name, { httpOnly: true });
     res.cookie("AT", authenticatedClient.credentials.access_token, { httpOnly: true });
     res.cookie("RF", authenticatedClient.credentials.refresh_token, { httpOnly: true });
+
+    // Instantiate a new record with no values set in the database, if the email is logging in for the first time
+    let db = await dbPromise;
+    db.run("INSERT OR IGNORE INTO rooms(email) VALUES(?)", response.data.email);
 
     // Log the login event
     console.info(`[INFO] ${response.data.email} logged in at ${new Date()}`)
