@@ -45,6 +45,22 @@ async function queryRooms(db: sqlite.Database, query): Promise<any[]> {
     return db.all("select size, room_no, email from rooms where room_no like ? and size=?", room_no, size);
 }
 
+async function setSwap(db: sqlite.Database, query) {
+    const email = escape(query.email);
+    const swap = (query.swap == "on") ? 1 : 0;
+    await db.run("UPDATE TABLE rooms SET swap = ? WHERE email = ?", swap, email);
+}
+
+async function getAvailableRooms(db: sqlite.Database): Promise<any[]> {
+    const rooms = await db.all(`
+        select distinct room_no as room_no, count(room_no) as count
+        from rooms
+        where swap = 1
+        group by room_no order by room_no;
+    `);
+    return rooms;
+}
+
 app.get('/', async function home(req, res) {
     let db = await dbPormise;
 
@@ -81,6 +97,7 @@ app.get('/', async function home(req, res) {
         },
         authLink: authURL,
         rows: await queryRooms(db, req.query),
+        ava: await getAvailableRooms(db),
         size: req.query.size,
         ac: req.query.ac
     });
