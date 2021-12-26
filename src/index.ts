@@ -62,7 +62,7 @@ async function getAvailableRooms(db: sqlite.Database): Promise<any[]> {
 }
 
 app.get('/', async function home(req, res) {
-    let db = await dbPormise;
+    let db = await dbPromise;
 
     const authURL = authenticatedClient.generateAuthUrl({
         access_type: "offline",
