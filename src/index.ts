@@ -66,7 +66,7 @@ app.get('/', async function home(req, res) {
 
     const authURL = authenticatedClient.generateAuthUrl({
         access_type: "offline",
-        scope: "https://www.googleapis.com/auth/userinfo.profile",
+        scope: ["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"],
         hd: "vitstudent.ac.in"                                      // Only allow accounts from the domain 'vitstudent.ac.in'
     });
 
@@ -121,6 +121,7 @@ app.get("/auth/google", async function login(req, res) {
     console.log(authenticatedClient.credentials);
 
     // Set relevant cookies
+    res.cookie("EM", response.data.email, { httpOnly: true });
     res.cookie("NM", response.data.given_name, { httpOnly: true });
     res.cookie("AT", authenticatedClient.credentials.access_token, { httpOnly: true });
     res.cookie("RF", authenticatedClient.credentials.refresh_token, { httpOnly: true });
@@ -137,6 +138,7 @@ app.get("/logout", async function logout(req, res) {
     */
 
     // Clear user-related cookies
+    res.clearCookie("EM");
     res.clearCookie("NM");
     res.clearCookie("AT");
     res.clearCookie("RF");
