@@ -50,7 +50,7 @@ async function queryRooms(db: sqlite.Database, query): Promise<any[]> {
 
 async function firstLogin(db: sqlite.Database, email: string): Promise<Boolean> {
     let row = await db.get("SELECT size, ac FROM rooms WHERE email = ?", email);
-    return !(row.size != null && row.ac != null);
+    return !(row != undefined && row.size != null && row.ac != null);
 }
 
 async function setSwap(db: sqlite.Database, email: string, checked: string) {
