@@ -66,6 +66,10 @@ img#logo {
 @media (max-width: 680px) {
   body {
     max-width: 20rem;
+    -webkit-tap-highlight-color: transparent;
+  }
+  img#logo {
+    width: 20%;
   }
 }
 
