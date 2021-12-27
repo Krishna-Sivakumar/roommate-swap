@@ -4,7 +4,7 @@
   "description": "A webapp to help vit students swap hostel rooms.",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "cp -R src/views build && cp -R src/public build && tsc",
     "start": "cd build && node .",
     "dev": "cd build && nodemon ."
   },
