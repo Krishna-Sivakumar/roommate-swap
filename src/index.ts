@@ -51,10 +51,36 @@ async function firstLogin(db: sqlite.Database, email: string): Promise<Boolean> 
     return !(row.size != null && row.ac != null);
 }
 
-async function setSwap(db: sqlite.Database, query) {
-    const email = escape(query.email);
-    const swap = (query.swap == "on") ? 1 : 0;
+async function setSwap(db: sqlite.Database, email: string, checked: string) {
+    let swap = (checked == "on") ? 1 : 0;
     await db.run("UPDATE TABLE rooms SET swap = ? WHERE email = ?", swap, email);
+}
+
+async function setRoom(db: sqlite.Database, email: string, room_no: number) {
+    await db.run("UPDATE rooms SET room_no = ? WHERE email = ?", room_no, email);
+}
+
+interface Form {
+    fields: Object,
+    files: Object
+}
+
+async function parseForm(req): Promise<Form> {
+    return new Promise((resolve, reject) => {
+        formidable({ multiples: true }).parse(req, (err, fields, files) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+
+            const res: Form = {
+                fields: fields,
+                files: files
+            }
+
+            resolve(res);
+        })
+    })
 }
 
 async function getAvailableRooms(db: sqlite.Database): Promise<any[]> {
@@ -127,6 +153,17 @@ app.post("/form/init", async function initialLogin(req, res) {
 
     res.redirect("/");
 });
+
+app.post("/form/swap", async function swap(req, res) {
+    let db = await dbPromise;
+
+    const formData = await parseForm(req);
+
+    setSwap(db, req.cookies.EM, formData.fields["swap"]);
+    setRoom(db, req.cookies.EM, formData.fields["room-no"]);
+
+    res.redirect("/");
+})
 
 app.get("/auth/google", async function login(req, res) {
     /*

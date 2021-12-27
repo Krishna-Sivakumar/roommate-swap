@@ -42,9 +42,14 @@
             <a href="<%= authLink %>">Login with Google</a>
         <% } else {%>
             <p>Hey <b><%= user.name %></b>! ● <a href="/logout">Logout</a></p>
-            <form method="get" name="swap-status">
+            <form method="post" action="/form/swap">
                 <label for="swap"><b>Swap</b></label>
                 <input type="checkbox" name="swap" id="swap">
+                <br>
+                <label for="room-no"><b>Room Number: </b></label>
+                <input type="number" name="room-no" id="room-no" min="101">
+                <br>
+                <input type="submit" value="Submit">
             </form>
             <% if (user.firstLogin) { %>
                 <div class="modal-back">
