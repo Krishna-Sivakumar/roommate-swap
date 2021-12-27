@@ -1,5 +1,6 @@
 import * as express from "express";
-import * as cookieParser from "cookie-parser"
+import * as cookieParser from "cookie-parser";
+import * as formidable from "formidable";
 import * as config from "./config";
 import * as sqlite3 from "sqlite3";
 import * as sqlite from "sqlite";
@@ -108,6 +109,23 @@ app.get('/', async function home(req, res) {
         size: req.query.size,
         ac: req.query.ac
     });
+});
+
+app.post("/form/init", async function initialLogin(req, res) {
+    let db = await dbPromise;
+
+    const formData = await parseForm(req);
+
+    const ac = formData.fields["initial-class"] == "AC" ? 1 : 0;
+
+    db.run(
+        "UPDATE rooms SET size = ?, ac = ? WHERE email = ?;",
+        formData.fields["initial-size"],
+        ac,
+        req.cookies.EM
+    );
+
+    res.redirect("/");
 });
 
 app.get("/auth/google", async function login(req, res) {

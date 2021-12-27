@@ -47,7 +47,28 @@
                 <input type="checkbox" name="swap" id="swap">
             </form>
             <% if (user.firstLogin) { %>
-                <p>You haven't set your room size and AC status, and <b>you probably should.</b></p>
+                <div class="modal-back">
+                    <div class="card modal-front">
+                        <p>You haven't set your room size and AC status, and <b>you probably should.</b></p>
+                        <p>Once you set your room size and AC status, <b>you can't change it.</b> So fill it carefully.</p>
+                        <form action="/form/init" method="post" name="initial-login">
+                            <label for="initial-size"><b>Size: </b></label>
+                            <select name="initial-size" id="initial-size">
+                                <option value="4">4</option>
+                                <option value="3">3</option>
+                                <option value="2">2</option>
+                            </select>
+                            <br>
+                            <label for="initial-class"><b>AC or Non-AC: </b></label>
+                            <select name="initial-class" id="initial-class">
+                                <option value="AC">AC</option>
+                                <option value="NAC">NAC</option>
+                            </select>
+                            <br>
+                            <input type="submit" value="Submit">
+                        </form>
+                    </div>
+                </div>
             <% } %>
         <% } %>
         <hr>

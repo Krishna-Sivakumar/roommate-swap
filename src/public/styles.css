@@ -156,3 +156,25 @@ input, select {
 #color-switch:active {
   text-shadow: 0 0 1px var(--card-shadow);
 }
+
+.modal-back {
+  position: absolute;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+
+  display: flex;
+  user-select: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-front {
+  background-color: var(--background-color);
+  user-select: text;
+  width: 50%;
+  margin-top: -15%;
+}
