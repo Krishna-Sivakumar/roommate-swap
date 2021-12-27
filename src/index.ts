@@ -8,6 +8,8 @@ import { OAuth2Client } from "google-auth-library"
 import { google } from "googleapis";
 const cors = require("cors");
 
+import * as auth from "./auth";
+
 let app = express();
 app.use(cors());
 app.set("view engine", "ejs");
@@ -107,24 +109,38 @@ app.get('/', async function home(req, res) {
     let user: Object = { loggedIn: false }
 
     if (req.cookies.AT != undefined) {
-        // Log the user in if the access token cookie is present
-        loggedIn = true;
-        name = req.cookies.NM;
-        try {
-            // Verify if access token is still valid
-            let getter = google.oauth2({ auth: authenticatedClient, version: "v2" })
-            let _ = await getter.userinfo.get({});
-
-            user["loggedIn"] = true;
-            user["name"] = name;
-            user["firstLogin"] = await firstLogin(db, req.cookies.EM);
-        } catch (e) {
-            // Log user out if it isn't
+        const isValid = await auth.tokenIsValid(req.cookies.AT);
+        if (isValid) {
+            user = {
+                loggedIn: true,
+                name: req.cookies.NM,
+                firstLogin: await firstLogin(db, req.cookies.EM)
+            };
+        } else if (req.cookies.RF != "undefined") {
+            // Check if refresh token is present, and use it to refresh the access token
+            try {
+                const access_token = await auth.refreshToken(config.GOOGLE_CLIENT_ID, config.GOOGLE_CLIENT_SECRET, req.cookies.RF);
+                req.cookies("AT", access_token, { httpOnly: true });
+            } catch (e) {
+                // User isn't logged in, clear cookies if present
+                res.clearCookie("EM");
+                res.clearCookie("NM");
+                res.clearCookie("AT");
+                res.clearCookie("RF");
+            }
+        } else {
+            // User isn't logged in, clear cookies if present
+            res.clearCookie("EM");
             res.clearCookie("NM");
             res.clearCookie("AT");
-            loggedIn = false;
-            console.error(e);
+            res.clearCookie("RF");
         }
+    } else {
+        // User isn't logged in, clear cookies if present
+        res.clearCookie("EM");
+        res.clearCookie("NM");
+        res.clearCookie("AT");
+        res.clearCookie("RF");
     }
 
     res.render("index", {
