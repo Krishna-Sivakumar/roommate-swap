@@ -1,8 +1,9 @@
 <!DOCTYPE HTML>
 <html>
     <head>
-        <title>home</title>
+        <title>VIT RoomSwap</title>
         <link href="styles.css" rel="stylesheet"/>
+        <link href="roomswap.png" rel="icon">
         <script>
             document.onreadystatechange = function(e) {
                 let body = document.getElementsByTagName("body")[0];
@@ -31,14 +32,26 @@
         </script>
     </head>
     <body data-theme="light">
-        <h1 id="clip">RoomSwap 𝛼</h1>
+        <a href="">
+            <h1 id="clip" style="display: flex; flex-direction: column;">
+                <img id="logo" src="roomswap.png">
+                RoomSwap 𝛼
+            </h1>
+        </a>
         <% if (!user.loggedIn) { %>
             <a href="<%= authLink %>">Login with Google</a>
         <% } else {%>
             <p>Hey <b><%= user.name %></b>! ● <a href="/logout">Logout</a></p>
+            <form method="get" name="swap-status">
+                <label for="swap"><b>Swap</b></label>
+                <input type="checkbox" name="swap" id="swap">
+            </form>
+            <% if (user.firstLogin) { %>
+                <p>You haven't set your room size and AC status, and <b>you probably should.</b></p>
+            <% } %>
         <% } %>
         <hr>
-        <form method="get">
+        <form method="get" name="search">
             <label for="room_no">Room No:</label>
             <input type="text" name="room_no">
             <label for="size">Size:</label>
@@ -70,6 +83,13 @@
         <%} else {%>
             <h3>No rooms available :(</h3>
         <%}%>
+        <div class="row">
+            <% for (let i = 0; i < ava.length; i ++) { %>
+            <div class="card">
+                <span><%= ava[i].room_no %> <span style="color: limegreen"><%= "● ".repeat(ava[i].count) %></span></span>
+            </div>
+            <% } %>
+        </div>
         <a id="color-switch">🌗</a>
     </body>
 </html>

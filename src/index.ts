@@ -77,6 +77,7 @@ app.get('/', async function home(req, res) {
 
     let loggedIn: boolean = false;
     let name: string = "";
+    let user: Object = { loggedIn: false }
 
     if (req.cookies.AT != undefined) {
         // Log the user in if the access token cookie is present
@@ -86,6 +87,10 @@ app.get('/', async function home(req, res) {
             // Verify if access token is still valid
             let getter = google.oauth2({ auth: authenticatedClient, version: "v2" })
             let _ = await getter.userinfo.get({});
+
+            user["loggedIn"] = true;
+            user["name"] = name;
+            user["firstLogin"] = await firstLogin(db, req.cookies.EM);
         } catch (e) {
             // Log user out if it isn't
             res.clearCookie("NM");
@@ -96,12 +101,8 @@ app.get('/', async function home(req, res) {
     }
 
     res.render("index", {
-        user: {
-            loggedIn: loggedIn,
-            name: name
-        },
+        user: user,
         authLink: authURL,
-        firstLogin: await firstLogin(db, req.cookies.EM),
         rows: await queryRooms(db, req.query),
         ava: await getAvailableRooms(db),
         size: req.query.size,
@@ -153,7 +154,7 @@ app.get("/logout", async function logout(req, res) {
     res.clearCookie("RF");
 
     // Log the logout event
-    console.info(`[INFO] ${req.cookies.NM} logged out at ${new Date()}`)
+    console.info(`[INFO] ${req.cookies.EM} logged out at ${new Date()}`)
     res.redirect("/");
 })
 

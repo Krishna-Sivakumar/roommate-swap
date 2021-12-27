@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap");
 @import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap');
 
 :root {
@@ -7,6 +8,7 @@
   --hr-color: #5f6368;
   --card-shadow: #5f6368;
   --font: 'Atkinson Hyperlegible', sans-serif;
+  --logo-filter: invert(1);
 }
 
 [data-theme="light"] {
@@ -15,6 +17,7 @@
   --text-color: #111;
   --hr-color: #555;
   --card-shadow: rgba(0,0,0,0.3);
+  --logo-filter: invert(0);
 }
 
 body {
@@ -42,6 +45,12 @@ p {
 a {
   color: var(--link-color);
   text-decoration: none;
+}
+
+img#logo {
+  width: 10%;
+  margin-right: 0.5em;
+  filter: var(--logo-filter);
 }
 
 @keyframes fadein {
@@ -77,6 +86,10 @@ a {
   height: fit-content;
   background: transparent;
 
+  box-shadow: 2px 2px 0px 0px var(--card-shadow);
+}
+
+.card:active {
   box-shadow: 2px 2px 0px 0px var(--card-shadow);
 }
 
