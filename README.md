@@ -4,6 +4,7 @@
 You need to build the service to run it first
 
 ```shell
+npm i package.json # To install dependencies initially
 npm run build
 ```
 
