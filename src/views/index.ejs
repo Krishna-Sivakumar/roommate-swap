@@ -99,22 +99,15 @@
             </select>
             <input type="submit" value="Submit">
         </form>
-        <%if (rows.length > 0) {%>
-            <% for (let i = 0; i < rows.length; i++) { %>
-                <div class="card">
-                    <p><b>Room No</b>: <%=rows[i].room_no%></p>
-                    <p><b>Email</b>: <%=rows[i].email%></p>
-                    <p><b>Size</b>: <%= rows[i].size%></p>
-                </div>
-            <% } %>
-        <%} else {%>
-            <h3>No rooms available :(</h3>
-        <%}%>
         <div class="row">
-            <% for (let i = 0; i < ava.length; i ++) { %>
-            <div class="card">
-                <span><%= ava[i].room_no %> <span style="color: limegreen"><%= "● ".repeat(ava[i].count) %></span></span>
-            </div>
+            <% if (ava.length > 0) { %>
+                <% for (let i = 0; i < ava.length; i ++) { %>
+                <div class="card">
+                    <span><%= ava[i].room_no %> <sup style="color: limegreen"><%= "●".repeat(ava[i].count) %></sup></span>
+                </div>
+                <% } %>
+            <% } else { %>
+                <h2>No rooms available :(</h2>
             <% } %>
         </div>
         <a id="color-switch">🌗</a>
