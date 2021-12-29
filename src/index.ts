@@ -48,7 +48,7 @@ async function ensureDB(uri: string) {
     db.exec("CREATE TABLE IF NOT EXISTS rooms(email TEXT PRIMARY KEY, room_no INTEGER, size INTEGER, ac INTEGER, swap INT DEFAULT 0);");
 }
 
-async function firstLogin(db: sqlite.Database, email: string): Promise<Boolean> {
+async function isFirstLogin(db: sqlite.Database, email: string): Promise<Boolean> {
     let row = await db.get("SELECT size, ac FROM rooms WHERE email = ?", email);
     return !(row != undefined && row.size != null && row.ac != null);
 }
@@ -114,7 +114,7 @@ app.get('/', async function home(req, res) {
             user = {
                 loggedIn: true,
                 name: req.session["NM"],
-                firstLogin: await firstLogin(db, req.session["EM"])
+                firstLogin: await isFirstLogin(db, req.session["EM"])
             };
         } else if (req.session["RF"] != "undefined") {
             // Check if refresh token is present, and use it to refresh the access token
