@@ -174,6 +174,7 @@ app.post("/form/swap", async function swap(req, res) {
 app.get("/auth/google", async function login(req, res) {
     /*
         Logs the user in and sets the following session variables:
+        EM: Google user's emai
         NM: Google user's given_name
         AT: Access Token
         RF: Refresh Token
