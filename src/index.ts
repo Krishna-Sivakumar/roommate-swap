@@ -18,7 +18,7 @@ app.use(cors());
 app.set("view engine", "ejs");
 app.use(cookieParser());
 app.use(session({
-    secret: process.env.SESSION_SECRET,
+    secret: config.SESSION_SECRET,
     store: new SQLiteStore,
     saveUninitialized: false,
     resave: false
