@@ -36,6 +36,10 @@ const authenticatedClient: OAuth2Client = new OAuth2Client(
     config.redirectURIs[0]
 );
 
+/*
+    database interface functions start here
+*/
+
 async function ensureDB(uri: string) {
     /*
         Creates a new database file and initializes tables in case they don't exist.
@@ -48,7 +52,7 @@ async function ensureDB(uri: string) {
     db.exec("CREATE TABLE IF NOT EXISTS rooms(email TEXT PRIMARY KEY, room_no INTEGER, size INTEGER, ac INTEGER, swap INT DEFAULT 0);");
 }
 
-async function firstLogin(db: sqlite.Database, email: string): Promise<Boolean> {
+async function isFirstLogin(db: sqlite.Database, email: string): Promise<Boolean> {
     let row = await db.get("SELECT size, ac FROM rooms WHERE email = ?", email);
     return !(row != undefined && row.size != null && row.ac != null);
 }
@@ -95,6 +99,14 @@ async function getAvailableRooms(db: sqlite.Database): Promise<any[]> {
     return rooms;
 }
 
+/* 
+    database interface functions end here 
+*/
+
+/*
+    routes start here
+*/
+
 app.get('/', async function home(req, res) {
     let db = await dbPromise;
 
@@ -114,7 +126,7 @@ app.get('/', async function home(req, res) {
             user = {
                 loggedIn: true,
                 name: req.session["NM"],
-                firstLogin: await firstLogin(db, req.session["EM"])
+                firstLogin: await isFirstLogin(db, req.session["EM"])
             };
         } else if (req.session["RF"] != "undefined") {
             // Check if refresh token is present, and use it to refresh the access token
@@ -144,6 +156,9 @@ app.get('/', async function home(req, res) {
 });
 
 app.post("/form/init", async function initialLogin(req, res) {
+    /*
+        Endpoint for setting the details on first-login
+    */
     let db = await dbPromise;
 
     const formData = await parseForm(req);
@@ -161,6 +176,9 @@ app.post("/form/init", async function initialLogin(req, res) {
 });
 
 app.post("/form/swap", async function swap(req, res) {
+    /*
+        Endpoint for setting the swap status
+    */
     let db = await dbPromise;
 
     const formData = await parseForm(req);
@@ -174,6 +192,7 @@ app.post("/form/swap", async function swap(req, res) {
 app.get("/auth/google", async function login(req, res) {
     /*
         Logs the user in and sets the following session variables:
+        EM: Google user's emai
         NM: Google user's given_name
         AT: Access Token
         RF: Refresh Token
@@ -216,6 +235,10 @@ app.get("/logout", async function logout(req, res) {
 
     res.redirect("/");
 })
+
+/*
+    routes end here
+*/
 
 let PORT = process.env.PORT || 4000;
 
