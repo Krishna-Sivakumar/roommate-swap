@@ -1,115 +1,151 @@
 <!DOCTYPE HTML>
 <html>
-    <head>
-        <title>VIT RoomSwap</title>
-        <link href="styles.css" rel="stylesheet"/>
-        <link href="roomswap.png" rel="icon">
-        <meta name="viewport" content="width=device-width,initial-scale=1.0">
-        <script>
-            document.onreadystatechange = function(e) {
+
+<head>
+    <title>VIT RoomSwap</title>
+    <link href="styles.css" rel="stylesheet" />
+    <link href="roomswap.png" rel="icon">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <script>
+        document.onreadystatechange = function (e) {
+            let body = document.getElementsByTagName("body")[0];
+            const theme = window.sessionStorage.getItem("theme");
+            if (theme == null) {
+                window.sessionStorage.setItem("theme", "light");
+            } else {
+                body.setAttribute("data-theme", theme);
+            }
+        };
+
+        window.onload = () => {
+            document.getElementById("color-switch").addEventListener("click", () => {
                 let body = document.getElementsByTagName("body")[0];
                 const theme = window.sessionStorage.getItem("theme");
                 if (theme == null) {
+                    body.setAttribute("data-theme", "light");
                     window.sessionStorage.setItem("theme", "light");
-                } else {
-                    body.setAttribute("data-theme", theme);
                 }
-            };
+                else {
+                    body.setAttribute("data-theme", (theme === "dark") ? "light" : "dark");
+                    window.sessionStorage.setItem("theme", (theme === "dark") ? "light" : "dark");
+                }
+            })
+        }
+    </script>
+</head>
 
-            window.onload = () => {
-                document.getElementById("color-switch").addEventListener("click", () => {
-                    let body = document.getElementsByTagName("body")[0];
-                    const theme = window.sessionStorage.getItem("theme");
-                    if (theme == null) {
-                        body.setAttribute("data-theme", "light");
-                        window.sessionStorage.setItem("theme", "light");
-                    }
-                    else {
-                        body.setAttribute("data-theme", (theme === "dark")? "light" : "dark");
-                        window.sessionStorage.setItem("theme", (theme === "dark")? "light" : "dark");
-                    }
-                })
-            }
-        </script>
-    </head>
-    <body data-theme="light">
-        <a href="">
-            <h1 id="clip" style="display: flex; flex-direction: column;">
-                <img id="logo" src="roomswap.png">
-                RoomSwap 𝛼
-            </h1>
-        </a>
-        <% if (!user.loggedIn) { %>
-            <a href="<%= authLink %>">Login with Google</a>
+<body data-theme="light">
+    <a href="/" id='logo-link'>
+        <h1 id="clip" style="display: flex; flex-direction: column;">
+            <img id="logo" alt='RoomSwap logo' src="roomswap.png">
+            RoomSwap 𝛼
+        </h1>
+    </a>
+    <% if (!user.loggedIn) { %>
+        <a href="<%= authLink %>">Login with Google</a>
         <% } else {%>
-            <p>Hey <b><%= user.name %></b>! ● <a href="/logout">Logout</a></p>
-            <form method="post" action="/form/swap">
-                <label for="swap"><b>Swap</b></label>
-                <input type="checkbox" name="swap" id="swap">
-                <br>
-                <label for="room-no"><b>Room Number: </b></label>
-                <input type="number" name="room-no" id="room-no" min="101">
-                <br>
-                <input type="submit" value="Submit">
-            </form>
+            <p>Logged in as
+                <strong>
+                    <%= user.name %>
+                </strong>
+                (<a href="/logout">Logout</a>)
+            </p>
+            <details id='your-details'>
+                <summary><strong>Your details</strong></summary>
+                <div class="body-form-wrapper">
+                    <form class='body-form' method="post" action="/form/swap">
+                        <div class="form-group">
+                            <label for="swap"><strong>Looking to swap?</strong></label>
+                            <input type="checkbox" name="swap" id="swap">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="room-no"><strong>Room Number: </strong></label>
+                            <input type="number" name="room-no" id="room-no" min="101" required>
+                        </div>
+
+                        <div class="form-group submit-group">
+                            <input type="submit" value="Update">
+                        </div>
+                    </form>
+                </div>
+            </details>
             <% if (user.firstLogin) { %>
                 <div class="modal-back">
                     <div class="card modal-front">
-                        <p>You haven't set your room size and AC status, and <b>you probably should.</b></p>
-                        <p>Once you set your room size and AC status, <b>you can't change it.</b> So fill it carefully.</p>
+                        <p>You need to set your <strong>room size and AC status</strong> to proceed.</p>
+                        <p>Note: These cannot be changed once set.</p>
                         <form action="/form/init" method="post" name="initial-login">
-                            <label for="initial-size"><b>Size: </b></label>
-                            <select name="initial-size" id="initial-size">
-                                <option value="4">4</option>
-                                <option value="3">3</option>
-                                <option value="2">2</option>
-                            </select>
-                            <br>
-                            <label for="initial-class"><b>AC or Non-AC: </b></label>
-                            <select name="initial-class" id="initial-class">
-                                <option value="AC">AC</option>
-                                <option value="NAC">NAC</option>
-                            </select>
-                            <br>
-                            <input type="submit" value="Submit">
+
+                            <div class="form-group">
+                                <label for="initial-size"><strong>Size: </strong></label>
+                                <select name="initial-size" id="initial-size">
+                                    <option value="4">4</option>
+                                    <option value="3">3</option>
+                                    <option value="2">2</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="initial-class"><strong>AC or Non-AC: </strong></label>
+                                <select name="initial-class" id="initial-class">
+                                    <option value="AC">AC</option>
+                                    <option value="NAC">NAC</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group submit-group">
+                                <input type="submit" value="Submit">
+                            </div>
                         </form>
                     </div>
                 </div>
-            <% } %>
-        <% } %>
-        <hr>
-        <form method="get" name="search">
-            <label for="room_no">Room No:</label>
-            <input type="text" name="room_no">
-            <label for="size">Size:</label>
-            <input type="number" name="size" value="2" min="2" max="4">
-            <label for="ac">AC:</label>
-            <select name="ac">
-                <option value="any">any</option>
-                <option value="ac">ac</option>
-                <option value="non-ac">non-ac</option>
-            </select>
-            <label for="block">Block:</label>
-            <select name="block">
-                <option value="any">any</option>
-                <option value="A">A</option>
-                <option value="B">B</option>
-                <option value="C">C</option>
-                <option value="D">D</option>
-            </select>
-            <input type="submit" value="Submit">
-        </form>
-        <div class="row">
-            <% if (ava.length > 0) { %>
-                <% for (let i = 0; i < ava.length; i ++) { %>
-                <div class="card">
-                    <span><%= ava[i].room_no %> <sup style="color: limegreen"><%= "●".repeat(ava[i].count) %></sup></span>
-                </div>
                 <% } %>
-            <% } else { %>
-                <h2>No rooms available :(</h2>
-            <% } %>
-        </div>
-        <a id="color-switch">🌗</a>
-    </body>
+                    <% } %>
+                        <h3>Rooms</h3>
+                        <details id='#filter-rooms'>
+                            <summary>Filter</summary>
+                            <div class="body-form-wrapper">
+                                <form name="search" class='body-form'>
+
+                                    <div class="form-group">
+                                        <label for="room_no">Room No:</label>
+                                        <input type="text" name="room_no">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="block">Block:</label>
+                                        <select name="block">
+                                            <option value="any">any</option>
+                                            <option value="A">A</option>
+                                            <option value="B">B</option>
+                                            <option value="C">C</option>
+                                            <option value="D">D</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group submit-group">
+                                        <input type="submit" value="Refine">
+                                    </div>
+                                </form>
+                            </div>
+                        </details>
+                        <div class="row">
+                            <% if (ava.length> 0) { %>
+                                <% for (let i=0; i < ava.length; i ++) { %>
+                                    <div class="card">
+                                        <span>
+                                            <%= ava[i].room_no %> <sup style="color: limegreen">
+                                                    <%= "●" .repeat(ava[i].count) %>
+                                                </sup>
+                                        </span>
+                                    </div>
+                                    <% } %>
+                                        <% } else { %>
+                                            <strong>No rooms available</strong>
+                                            <% } %>
+                        </div>
+                        <a id="color-switch">🌗</a>
+</body>
+
 </html>
