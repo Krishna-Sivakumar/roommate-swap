@@ -4,7 +4,9 @@ if (!process.env.VSWAP_CLIENT_ID || !process.env.VSWAP_CLIENT_SECRET || !process
 export const SESSION_SECRET = process.env.VSWAP_SESSION_SECRET;
 export const GOOGLE_CLIENT_ID: string = process.env.VSWAP_CLIENT_ID;
 export const GOOGLE_CLIENT_SECRET: string = process.env.VSWAP_CLIENT_SECRET;
-export const redirectURIs = [
-    "http://localhost:4000/auth/google"
-];
-export const SERVER_ROOT_URI = "http://localhost:4000";
+
+export const SERVER_ROOT_URI = process.env.VSWAP_ROOT_URI || "https://roomswap.ml";
+
+export const REDIRECT_URIS = {
+    google: `${SERVER_ROOT_URI}/auth/google`
+};

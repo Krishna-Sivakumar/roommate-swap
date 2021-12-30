@@ -32,7 +32,7 @@ let dbPromise = sqlite.open({
 const authenticatedClient: OAuth2Client = new OAuth2Client(
     config.GOOGLE_CLIENT_ID,
     config.GOOGLE_CLIENT_SECRET,
-    config.redirectURIs[0]
+    config.REDIRECT_URIS.google
 );
 
 /*
