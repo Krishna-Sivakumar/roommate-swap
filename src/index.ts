@@ -35,6 +35,10 @@ const authenticatedClient: OAuth2Client = new OAuth2Client(
     config.redirectURIs[0]
 );
 
+/*
+    database interface functions start here
+*/
+
 async function ensureDB(uri: string) {
     /*
         Creates a new database file and initializes tables in case they don't exist.
@@ -93,6 +97,14 @@ async function getAvailableRooms(db: sqlite.Database): Promise<any[]> {
     `);
     return rooms;
 }
+
+/* 
+    database interface functions end here 
+*/
+
+/*
+    routes start here
+*/
 
 app.get('/', async function home(req, res) {
     let db = await dbPromise;
@@ -161,6 +173,9 @@ app.get('/', async function home(req, res) {
 });
 
 app.post("/form/init", async function initialLogin(req, res) {
+    /*
+        Endpoint for setting the details on first-login
+    */
     let db = await dbPromise;
 
     const formData = await parseForm(req);
@@ -179,6 +194,9 @@ app.post("/form/init", async function initialLogin(req, res) {
 });
 
 app.post("/form/swap", async function swap(req, res) {
+    /*
+        Endpoint for setting the swap status
+    */
     let db = await dbPromise;
 
     const formData = await parseForm(req);
@@ -192,6 +210,7 @@ app.post("/form/swap", async function swap(req, res) {
 app.get("/auth/google", async function login(req, res) {
     /*
         Logs the user in and sets the following session variables:
+        EM: Google user's emai
         NM: Google user's given_name
         AT: Access Token
         RF: Refresh Token
@@ -234,6 +253,10 @@ app.get("/logout", async function logout(req, res) {
 
     res.redirect("/");
 })
+
+/*
+    routes end here
+*/
 
 let PORT = process.env.PORT || 4000;
 
