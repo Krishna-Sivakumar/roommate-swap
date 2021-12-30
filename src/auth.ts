@@ -23,9 +23,7 @@ export async function refreshToken(client_id: string, client_secret: string, ref
         }
 
         const response = await axios.post("https://oauth2.googleapis.com/token", postBody);
-
-        if ("error" in response.data)
-            throw new Error("Refresh Token has been revoked");
+        if ("error" in response.data) throw new Error("Refresh Token has been revoked");
 
         return response.data["access_token"];
     } catch (e) {
