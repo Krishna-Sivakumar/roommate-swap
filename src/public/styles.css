@@ -63,7 +63,6 @@ img#logo {
 
 .card {
   padding: 0.5rem;
-  padding-top: 0;
   border: 1px solid #5f6368;
   margin: 1rem;
   border-radius: 5px;
@@ -176,6 +175,7 @@ input[type='submit'], select, input[type='checkbox'] {
 }
 
 .form-group.submit-group {
+  margin-top: 1rem;
   justify-content: flex-end;
 }
 
@@ -244,6 +244,18 @@ details:not([open]) {
   }
 }
 
+.room-heading {
+  font-weight: bold;
+}
+
+.room-meta {
+  margin-left: 0.5rem;
+}
+
+.room-occupants {
+  margin: 0;
+}
+
 /*For Phones*/
 @media (max-width: 680px) {
   body {
@@ -253,6 +265,10 @@ details:not([open]) {
 
   img#logo {
     width: 20%;
+  }
+
+  #color-switch {
+    position: absolute;
   }
 }
 

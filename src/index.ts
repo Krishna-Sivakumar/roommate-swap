@@ -12,7 +12,6 @@ import { google } from "googleapis";
 const SQLiteStore = require("connect-sqlite3")(session);
 
 import * as auth from "./auth";
-
 let app = express();
 app.use(cors());
 app.set("view engine", "ejs");
@@ -45,21 +44,21 @@ async function ensureDB(uri: string) {
         driver: sqlite3.Database
     })
 
-    db.exec("CREATE TABLE IF NOT EXISTS rooms(email TEXT PRIMARY KEY, room_no INTEGER, size INTEGER, ac INTEGER, swap INT DEFAULT 0);");
+    db.exec("CREATE TABLE IF NOT EXISTS users(email TEXT PRIMARY KEY, name TEXT, reg_no TEXT, room_no INTEGER, size INTEGER, ac INTEGER, swap INT DEFAULT 0);");
 }
 
 async function firstLogin(db: sqlite.Database, email: string): Promise<Boolean> {
-    let row = await db.get("SELECT size, ac FROM rooms WHERE email = ?", email);
+    let row = await db.get("SELECT size, ac FROM users WHERE email = ?", email);
     return !(row != undefined && row.size != null && row.ac != null);
 }
 
 async function setSwap(db: sqlite.Database, email: string, checked: string) {
     let swap = (checked == "on") ? 1 : 0;
-    await db.run("UPDATE rooms SET swap = ? WHERE email = ?", swap, email);
+    await db.run("UPDATE users SET swap = ? WHERE email = ?", swap, email);
 }
 
 async function setRoom(db: sqlite.Database, email: string, room_no: number) {
-    await db.run("UPDATE rooms SET room_no = ? WHERE email = ?", room_no, email);
+    await db.run("UPDATE users SET room_no = ? WHERE email = ?", room_no, email);
 }
 
 interface Form {
@@ -87,10 +86,10 @@ async function parseForm(req): Promise<Form> {
 
 async function getAvailableRooms(db: sqlite.Database): Promise<any[]> {
     const rooms = await db.all(`
-        select distinct room_no as room_no, count(room_no) as count
-        from rooms
+        select distinct name, reg_no, room_no, size, ac
+        from users
         where swap = 1
-        group by room_no order by room_no;
+        order by room_no;
     `);
     return rooms;
 }
@@ -101,21 +100,31 @@ app.get('/', async function home(req, res) {
     const authURL = authenticatedClient.generateAuthUrl({
         access_type: "offline",
         scope: ["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"],
-        hd: "vitstudent.ac.in"                                      // Only allow accounts from the domain 'vitstudent.ac.in'
+        hd: "vitstudent.ac.in" // Only allow accounts from the domain 'vitstudent.ac.in'
     });
 
     let loggedIn: boolean = false;
     let name: string = "";
-    let user: Object = { loggedIn: false }
+    let user: Record<string, any> = { loggedIn: false }
 
     if (req.session["AT"] != undefined) {
         const isValid = await auth.tokenIsValid(req.session["AT"]);
         if (isValid) {
+            const isFirstLogin = await firstLogin(db, req.session["EM"]);
             user = {
                 loggedIn: true,
                 name: req.session["NM"],
-                firstLogin: await firstLogin(db, req.session["EM"])
+                firstLogin: isFirstLogin,
             };
+
+            if (!isFirstLogin) {
+                let details = await getUserDetails(db, req.session["EM"]);
+                user['swapping'] = details.swap;
+                user['regno'] = details.reg_no;
+                user['room_no'] = details.room_no;
+                user['size'] = details.size;
+                user['ac'] = details.ac == 1;
+            }
         } else if (req.session["RF"] != "undefined") {
             // Check if refresh token is present, and use it to refresh the access token
             try {
@@ -134,10 +143,18 @@ app.get('/', async function home(req, res) {
         req.session.destroy(() => { });
     }
 
+    let rooms = await getAvailableRooms(db);
+    let grouped: Record<number, any[]> = {};
+
+    for (const user of rooms) {
+        grouped[user.room_no] = grouped[user.room_no] || [];
+        grouped[user.room_no].push(user);
+    }
+
     res.render("index", {
         user: user,
         authLink: authURL,
-        ava: await getAvailableRooms(db),
+        available: grouped,
         size: req.query.size,
         ac: req.query.ac
     });
@@ -151,9 +168,10 @@ app.post("/form/init", async function initialLogin(req, res) {
     const ac = formData.fields["initial-class"] == "AC" ? 1 : 0;
 
     db.run(
-        "UPDATE rooms SET size = ?, ac = ? WHERE email = ?;",
+        "UPDATE users SET size = ?, ac = ?, reg_no = ? WHERE email = ?;",
         formData.fields["initial-size"],
         ac,
+        formData.fields["reg-no"],
         req.session["EM"]
     );
 
@@ -195,7 +213,7 @@ app.get("/auth/google", async function login(req, res) {
 
     // Instantiate a new record with no values set in the database, if the email is logging in for the first time
     let db = await dbPromise;
-    db.run("INSERT OR IGNORE INTO rooms(email) VALUES(?)", response.data.email);
+    db.run("INSERT OR IGNORE INTO users(email, name) VALUES(?, ?)", response.data.email, response.data.given_name);
 
     // Log the login event
     console.info(`[INFO] ${response.data.email} logged in at ${new Date()}`)
@@ -222,3 +240,9 @@ let PORT = process.env.PORT || 4000;
 ensureDB("database.db");
 
 app.listen(PORT, () => console.log(`listening on port ${PORT}`));
+
+async function getUserDetails(db: sqlite.Database<sqlite3.Database, sqlite3.Statement>, email: string) {
+    let row = await db.get("SELECT * FROM users WHERE email = ?", email);
+    return row || null;
+}
+
