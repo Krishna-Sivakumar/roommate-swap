@@ -82,8 +82,20 @@ input, select {
   border-radius: 5px;
   background-color: transparent;
   color: var(--text-color);
-
   font-family: var(--font);
+}
+
+input:not([type='checkbox']):not([type='submit']), select {
+  min-width: 15ch;
+}
+
+input[readonly] {
+  border: none;
+  text-align: right;
+}
+
+#your-details.noborder {
+  border: none;
 }
 
 .card a {
@@ -103,10 +115,9 @@ input, select {
   padding: 0.2rem;
 }
 
-.row {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
+.cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
 }
 
 #clip {
@@ -195,7 +206,7 @@ input[type='submit'], select, input[type='checkbox'] {
 
 #swap:not(:checked)::after {
   content: "No";
-  background: #aca921;
+  background: #ff5b5b;
 }
 
 #swap:checked::after {
@@ -256,11 +267,20 @@ details:not([open]) {
   margin: 0;
 }
 
+.toast {
+  background: rgba(0, 0, 0, 0.5);
+  padding: 1rem;
+  text-align: center;
+  color: white;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
 /*For Phones*/
-@media (max-width: 680px) {
+@media (max-aspect-ratio: 1/1) {
   body {
-    max-width: 20rem;
     -webkit-tap-highlight-color: transparent;
+    max-width: 90vw;
   }
 
   img#logo {
@@ -270,11 +290,9 @@ details:not([open]) {
   #color-switch {
     position: absolute;
   }
-}
 
-/*For Tablets*/
-@media (max-width: 809px) and (min-width: 681px) {
-  body {
-    max-width: 31rem;
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr;
   }
 }
