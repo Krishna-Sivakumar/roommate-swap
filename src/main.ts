@@ -1,9 +1,9 @@
 // deno-lint-ignore-file no-explicit-any
 import { eta, opine, opineCors, serveStatic, urlencoded } from './deps.ts';
 import { getAccessToken, getAuthUrl, getProfileInfo } from "./gauth.ts";
-import { error, info } from "./logging.ts";
+import { info } from "./logging.ts";
 import { firstLogin, getSwappingUsers, getUserDetails, initialiseDB, setRoom, setSwap } from "./queries.ts";
-import { destroySession, getSession, initSessions } from "./session.ts";
+import { getClientSession, initSessions } from "./session.ts";
 import { execute, getConfigFromEnv } from "./utils.ts";
 
 const config = getConfigFromEnv();
@@ -33,7 +33,7 @@ initSessions(app);
 app.get('/', function home(req, res, next) {
     const authUrl = getAuthUrl(config);
 
-    const [sid, session] = getSession(req);
+    const { sid, session } = getClientSession(req, res);
     const email = session.get<string>(sid, 'email');
 
     const user: Record<string, any> = {
@@ -45,7 +45,6 @@ app.get('/', function home(req, res, next) {
         user.firstLogin = firstLogin(db, email);
         user.name = session.get<string>(sid, 'name');
         const details = getUserDetails(db, email);
-        console.log(details);
 
         if (!user.firstLogin) {
             Object.assign(user, details);
@@ -80,7 +79,7 @@ app.get('/auth/google', async function gauth(req, res, next) {
     const token = await getAccessToken(config, authCode);
     const userInfo = await getProfileInfo(token);
 
-    const [sid, session] = getSession(req);
+    const { sid, session } = getClientSession(req, res);
     session.set(sid, 'email', userInfo.email);
     session.set(sid, 'name', userInfo.given_name);
 
@@ -92,13 +91,13 @@ app.get('/auth/google', async function gauth(req, res, next) {
 })
 
 app.get('/auth/logout', function logout(req, res) {
-    const [sid, _] = getSession(req);
-    destroySession(res, sid);
+    const { sid, session } = getClientSession(req, res);
+    session.clear(sid);
     res.redirect('/');
 });
 
 app.post("/form/swap", function swap(req, res, next) {
-    const [sid, session] = getSession(req);
+    const { sid, session } = getClientSession(req, res);
     const email = session.get<string>(sid, 'email')!;
 
     setSwap(db, email, req.body["swap"]);
@@ -109,7 +108,7 @@ app.post("/form/swap", function swap(req, res, next) {
 })
 
 app.post("/form/init", function initialLogin(req, res, next) {
-    const [sid, session] = getSession(req);
+    const { sid, session } = getClientSession(req, res);
     const email = session.get<string>(sid, 'email')!;
 
     const ac = req.body["initial-class"] == "AC" ? 1 : 0;
