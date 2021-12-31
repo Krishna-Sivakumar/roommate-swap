@@ -2,7 +2,7 @@
 import { eta, opine, opineCors, serveStatic, urlencoded } from './deps.ts';
 import { getAccessToken, getAuthUrl, getProfileInfo } from "./gauth.ts";
 import { info } from "./logging.ts";
-import { firstLogin, getSwappingUsers, getUserDetails, initialiseDB, setRoom, setSwap } from "./queries.ts";
+import { firstLogin, getSwappingUsers, getUserDetails, initialiseDB } from "./queries.ts";
 import { getClientSession, initSessions } from "./session.ts";
 import { execute, getConfigFromEnv } from "./utils.ts";
 
@@ -19,16 +19,18 @@ app.set("views", "./views");
 app.set("view engine", "eta");
 app.engine("eta", eta.renderFile);
 
-app.use(opineCors({
-    credentials: true,
-    exposedHeaders: ['X-Powered-By', 'Set-Cookie'],
-    origin: "*"
-}));
-
 // serve static files
 app.use(serveStatic('public'));
 
 initSessions(app);
+
+const ALLOWED_ORIGINS_RE = /.*(localhost|roomswap.ml|127.0.0.1).*/;
+
+app.use(opineCors({
+    credentials: true,
+    exposedHeaders: ['X-Powered-By', 'Set-Cookie'],
+    origin: ALLOWED_ORIGINS_RE
+}));
 
 app.get('/', function home(req, res, next) {
     const authUrl = getAuthUrl(config);
@@ -60,7 +62,7 @@ app.get('/', function home(req, res, next) {
     }
 
     const ctx = {
-        authUrl, user, available: grouped, size: req.query.size, ac: req.query.ac
+        authUrl, user, available: grouped
     };
 
     eta.renderFile('index.eta', ctx, { views: "./views" }, (err, html) => {
@@ -96,12 +98,18 @@ app.get('/auth/logout', function logout(req, res) {
     res.redirect('/');
 });
 
-app.post("/form/swap", function swap(req, res, next) {
+app.post("/form/details", function swap(req, res, next) {
     const { sid, session } = getClientSession(req, res);
-    const email = session.get<string>(sid, 'email')!;
 
-    setSwap(db, email, req.body["swap"]);
-    setRoom(db, email, req.body["room-no"]);
+    const email = session.get<string>(sid, 'email')!;
+    execute(db, 'update users set swap = ?, ac = ?, reg_no = ?, room_no = ?, size = ? where email = ?;',
+        req.body['swap'] === 'on',
+        req.body['ac-type'] === 'AC',
+        new String(req.body['reg-no']).toUpperCase(),
+        req.body['room-no'],
+        req.body['room-size'],
+        email
+    );
 
     res.redirect("/");
     next();
@@ -122,8 +130,6 @@ app.post("/form/init", function initialLogin(req, res, next) {
     res.redirect("/");
     next();
 })
-
-
 
 app.listen(config.port, () => {
     info('Listening on port', config.port);

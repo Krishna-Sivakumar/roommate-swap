@@ -1,27 +1,26 @@
 # VIT RoomSwap
 
-### To build
+## Usage
 
-You need to build the service to run it first.
-
-```shell
-npm i package.json # To install dependencies initially
-npm run build
-```
-
-Set the VSWAP_CLIENT_SECRET and VSWAP_CLIENT_ID to your credentials obtained
+Set the `VSWAP_CLIENT_SECRET` and `VSWAP_CLIENT_ID` to your credentials obtained
 from the Google API.
+
+You can also set `VSWAP_SERVER_URI` to configure the redirect URI for OAuth
+logins, and set `PORT` to determine the port VSwap runs on.
 
 ### To run a development server
 
-(You'll need Nodemon installed.)
-
 ```shell
-npm run dev
+make dev
 ```
 
 ### To run a production server
 
 ```shell
-npm start
+make start
 ```
+
+## LICENSE
+
+Copyright (c) 2021 Krishna Sivakumar, Siddharth Singh under
+[the MIT License](LICENSE).

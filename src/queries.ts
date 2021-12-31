@@ -18,15 +18,6 @@ export function firstLogin(db: DB, email: string) {
     return (size == null || ac == null);
 }
 
-export function setSwap(db: DB, email: string, checked: string) {
-    const swap = (checked == "on") ? 1 : 0;
-    db.query("UPDATE users SET swap = ? WHERE email = ?", [swap, email]);
-}
-
-export function setRoom(db: DB, email: string, roomNo: number) {
-    db.query("UPDATE users SET room_no = ? WHERE email = ?", [roomNo, email]);
-}
-
 export function getSwappingUsers(db: DB) {
     const result = fetchMany(db, `
         select distinct name, reg_no, room_no, size, ac
