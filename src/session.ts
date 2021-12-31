@@ -26,8 +26,6 @@ export function sessionMiddleware(req: OpineRequest, res: OpineResponse, next: N
             expires: new Date(Date.now() + 864e5),
             httpOnly: true
         });
-
-        console.log('session.ts', res.headers);
     }
 
     next();

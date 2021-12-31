@@ -29,8 +29,6 @@ export async function getAccessToken(config: VswapConfig, code: string): Promise
         body: params.toString()
     });
 
-    console.log(response);
-
     if (response.status != 200) throw new Error('Error: Failed to receive access token');
 
     const json = await response.json();

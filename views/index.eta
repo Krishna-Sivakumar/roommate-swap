@@ -40,18 +40,18 @@
       RoomSwap 𝛼
     </h1>
   </a>
-  <% if (!user.loggedIn) { %>
-  <a href="<%= authLink %>">Login with Google</a>
+  <% if (!it.user.loggedIn) { %>
+  <a href="<%= it.authUrl %>">Login with Google</a>
   <% } else {%>
   <p>Logged in as
     <strong>
-      <%= user.name %>
+      <%= it.user.name %>
     </strong>
-    (<a href="/logout">Logout</a>)
+    (<a href="/auth/logout">Logout</a>)
   </p>
-  <details id='your-details' <%= user.firstLogin ? 'open' : '' %>>
+  <details id='your-details' <%= it.user.firstLogin ? 'open' : '' %>>
     <summary><strong>Your details</strong></summary>
-    <%if (user.firstLogin) { %>
+    <%if (it.user.firstLogin) { %>
     <div class='toast'>If you want to be listed on the index, set "Looking to swap" to "Yes".</div>
     <% } %>
 
@@ -59,31 +59,31 @@
       <form class='body-form' method="post" action="/form/swap">
         <div class="form-group">
           <label for="swap"><strong>Looking to swap?</strong></label>
-          <input type="checkbox" name="swap" id="swap" <% if (user.swapping) { %> checked <% } %>>
+          <input type="checkbox" name="swap" id="swap" <% if (it.user.swapping) { %> checked <% } %>>
         </div>
 
         <div class="form-group">
           <label for="room-no"><strong>Room Number</strong></label>
-          <input type="number" name="room-no" id="room-no" min="101" required <% if (user.room_no) { %> value="<%= user.room_no %>" <% } %>>
+          <input type="number" name="room-no" id="room-no" min="101" required <% if (it.user.roomNo) { %> value="<%= it.user.roomNo %>" <% } %>>
         </div>
 
-        <% if (!user.firstLogin) { %>
+        <% if (!it.user.firstLogin) { %>
         <div class='form-group'>
           <strong>Registration number</strong>
           <span>
-            <%= user.regno %>
+            <%= it.user.regNo %>
           </span>
         </div>
         <div class='form-group'>
           <strong>Room size</strong>
           <span>
-            <%= user.size %>
+            <%= it.user.size %>
           </span>
         </div>
         <div class='form-group'>
           <strong>A/C type</strong>
           <span>
-            <%= user.ac ? 'AC' : 'Non-AC' %>
+            <%= it.user.ac ? 'AC' : 'Non-AC' %>
           </span>
         </div>
         <% } %>
@@ -94,7 +94,7 @@
       </form>
     </div>
   </details>
-  <% if (user.firstLogin) { %>
+  <% if (it.user.firstLogin) { %>
   <div class="modal-back">
     <div class="card modal-front">
       <p>
@@ -161,8 +161,8 @@
     </div>
   </details>
   <div class="row">
-    <% if (Object.keys(available).length > 0) { %>
-    <% for (const [room, users] of Object.entries(available)) { %>
+    <% if (Object.keys(it.available).length > 0) { %>
+    <% for (const [room, users] of Object.entries(it.available)) { %>
     <div class="card">
       <div class='room-heading'>No. <%= room %></div>
       <div class='room-meta'>
@@ -170,7 +170,7 @@
           <strong><%= users.length %></strong> swapper(s)
           <ul class='room-occupants'>
             <% for (const user of users) { %>
-            <li><%= `${user.name} (${user.reg_no})` %></li>
+            <li><%= `${user.name} (${user.regNo})` %></li>
             <% } %>
           </ul>
         </div>

@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import { DB } from "./deps.ts";
 import { fetchOptional, fetchMany } from "./utils.ts";
 
@@ -14,7 +15,7 @@ export function firstLogin(db: DB, email: string) {
     if (!result) return false;
     const [size, ac] = result;
 
-    return (!size || !ac);
+    return (size == null || ac == null);
 }
 
 export function setSwap(db: DB, email: string, checked: string) {
@@ -26,7 +27,7 @@ export function setRoom(db: DB, email: string, roomNo: number) {
     db.query("UPDATE users SET room_no = ? WHERE email = ?", [roomNo, email]);
 }
 
-export function getAvailableRooms(db: DB) {
+export function getSwappingUsers(db: DB) {
     const result = fetchMany(db, `
         select distinct name, reg_no, room_no, size, ac
         from users
@@ -42,4 +43,9 @@ export function getAvailableRooms(db: DB) {
     }
 
     return rooms;
+}
+
+export function getUserDetails(db: DB, key: string) {
+    const [email, name, reg_no, room_no, size, ac, swap] = fetchOptional<string[]>(db, "SELECT * FROM users WHERE email = ?", key)!;
+    return { email, name, regNo: reg_no, roomNo: room_no, size, ac, swapping: swap };
 }
