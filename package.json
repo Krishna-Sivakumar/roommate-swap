@@ -4,7 +4,7 @@
   "description": "A webapp to help vit students swap hostel rooms.",
   "main": "index.js",
   "scripts": {
-    "build": "mkdir -p build && cp -R src/views build && cp -R src/public build && tsc",
+    "build": "mkdir -p build && cp -R src/views build && cp -R src/public build && npx tsc",
     "start": "npm run build && cd build && node .",
     "dev": "npm run build && cd build && nodemon ."
   },
