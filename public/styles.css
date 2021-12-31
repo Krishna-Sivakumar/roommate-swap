@@ -115,7 +115,7 @@ input[readonly] {
   padding: 0.2rem;
 }
 
-.row {
+.cards {
   display: grid;
   grid-template-columns: 1fr 1fr;
 }
@@ -291,7 +291,7 @@ details:not([open]) {
     position: absolute;
   }
 
-  .row {
+  .cards {
     display: grid;
     grid-template-columns: 1fr;
   }

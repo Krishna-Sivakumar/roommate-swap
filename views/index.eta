@@ -130,7 +130,7 @@
       </form>
     </div>
   </details>
-  <div class="row">
+  <div class="cards">
     <% if (Object.keys(it.available).length > 0) { %>
     <% for (const [room, users] of Object.entries(it.available)) { %>
     <div class="card">
