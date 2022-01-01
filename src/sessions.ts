@@ -17,12 +17,42 @@ function getClient(req: OpineRequest, res: OpineResponse) {
             httpOnly: true
         });
     }
-    return { sid, session };
+    return new ClientSession(sid, session);
 }
 
 function destroy(res: OpineResponse, sid: string) {
     res.clearCookie('sid');
     res.app.get('session').drop(sid);
+}
+
+class ClientSession {
+    sid: string;
+    session: SqliteSessionStore;
+
+    constructor(sid: string, session: SqliteSessionStore) {
+        this.sid = sid;
+        this.session = session;
+    }
+
+    get<T>(key: string): T | null {
+        return this.session.get<T>(this.sid, key);
+    }
+
+    set(key: string, val: any) {
+        this.session.set(this.sid, key, val);
+    }
+
+    delete(key: string) {
+        this.session.delete(this.sid, key);
+    }
+
+    clear() {
+        this.session.clear(this.sid);
+    }
+
+    drop() {
+        this.session.drop(this.sid);
+    }
 }
 
 class SqliteSessionStore {
@@ -55,6 +85,11 @@ class SqliteSessionStore {
         execute(this.db, 'UPDATE sessions SET data = ? WHERE id = ?;', JSON.stringify(data), sid);
     }
 
+    get<T>(sid: string, key: string): T | null {
+        const session = this.getSession(sid);
+        return session[key] || null;
+    }
+
     set(sid: string, key: string, val: any) {
         const session = this.getSession(sid);
         session[key] = val;
@@ -65,11 +100,6 @@ class SqliteSessionStore {
         const session = this.getSession(sid);
         delete session[key];
         this.persist(sid, session);
-    }
-
-    get<T>(sid: string, key: string): T | null {
-        const session = this.getSession(sid);
-        return session[key] || null;
     }
 
     clear(sid: string) {

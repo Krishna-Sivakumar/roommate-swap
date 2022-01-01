@@ -35,8 +35,8 @@ app.use('/public', serveDir('public'));
 app.get('/', function home(req, res, next) {
     const authUrl = getAuthUrl(config);
 
-    const { sid, session } = sessions.getClient(req, res);
-    const email = session.get<string>(sid, 'email');
+    const session = sessions.getClient(req, res);
+    const email = session.get<string>('email');
 
     const user: Record<string, any> = {
         loggedIn: false
@@ -45,7 +45,7 @@ app.get('/', function home(req, res, next) {
     if (email) {
         user.loggedIn = true;
         user.firstLogin = isFirstLogin(db, email);
-        user.name = session.get<string>(sid, 'name');
+        user.name = session.get<string>('name');
         const details = getUserDetails(db, email);
 
         if (!user.firstLogin) {
@@ -81,9 +81,9 @@ app.get('/auth/google', async function gauth(req, res, next) {
     const token = await getAccessToken(config, authCode);
     const userInfo = await getProfileInfo(token);
 
-    const { sid, session } = sessions.getClient(req, res);
-    session.set(sid, 'email', userInfo.email);
-    session.set(sid, 'name', userInfo.given_name);
+    const session = sessions.getClient(req, res);
+    session.set('email', userInfo.email);
+    session.set('name', userInfo.given_name);
 
     execute(db, "INSERT OR IGNORE INTO users(email, name) VALUES(?, ?)", userInfo.email, userInfo.given_name);
     info(`${userInfo.email} logged in at ${new Date()}`);
@@ -93,15 +93,15 @@ app.get('/auth/google', async function gauth(req, res, next) {
 })
 
 app.get('/auth/logout', function logout(req, res) {
-    const { sid, session } = sessions.getClient(req, res);
-    session.clear(sid);
+    const session = sessions.getClient(req, res);
+    session.clear();
     res.redirect('/');
 });
 
 app.post("/form/details", function swap(req, res, next) {
-    const { sid, session } = sessions.getClient(req, res);
+    const session = sessions.getClient(req, res);
 
-    const email = session.get<string>(sid, 'email')!;
+    const email = session.get<string>('email')!;
     execute(db, 'update users set swap = ?, ac = ?, reg_no = ?, room_no = ?, size = ? where email = ?;',
         req.body['swap'] === 'on',
         req.body['ac-type'] === 'AC',
