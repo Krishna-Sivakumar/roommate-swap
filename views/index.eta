@@ -3,8 +3,8 @@
 
 <head>
   <title>VIT RoomSwap</title>
-  <link href="styles.css" rel="stylesheet" />
-  <link href="roomswap.png" rel="icon">
+  <link href="/public/styles.css" rel="stylesheet" />
+  <link href="/public/roomswap.png" rel="icon">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <script>
     document.onreadystatechange = function(e) {
@@ -36,57 +36,63 @@
 <body data-theme="light">
   <a href="/" id='logo-link'>
     <h1 id="clip" style="display: flex; flex-direction: column;">
-      <img id="logo" alt='RoomSwap logo' src="roomswap.png">
+      <img id="logo" alt='RoomSwap logo' src="/public/roomswap.png">
       RoomSwap 𝛼
     </h1>
   </a>
-  <% if (!user.loggedIn) { %>
-  <a href="<%= authLink %>">Login with Google</a>
-  <% } else {%>
+  <% if (!it.user.loggedIn) { %>
+  <a href="<%= it.authUrl %>">Login with Google</a>
+  <% } else { %>
   <p>Logged in as
     <strong>
-      <%= user.name %>
+      <%= it.user.name %>
     </strong>
-    (<a href="/logout">Logout</a>)
+    (<a href="/auth/logout">Logout</a>)
   </p>
-  <details id='your-details' <%= user.firstLogin ? 'open' : '' %>>
+  <details id='your-details' <%= it.user.firstLogin ? 'open' : '' %> <%= it.user.firstLogin ? `class=noborder` : '' %>>
     <summary><strong>Your details</strong></summary>
-    <%if (user.firstLogin) { %>
-    <div class='toast'>If you want to be listed on the index, set "Looking to swap" to "Yes".</div>
+    <%if (it.user.firstLogin) { %>
+    <div class='toast'>
+      It's your first time logging in, so you'll need to enter these details to continue!
+      If you want to be listed on the index, set "Looking to swap" to "Yes".
+    </div>
     <% } %>
 
     <div class="body-form-wrapper">
-      <form class='body-form' method="post" action="/form/swap">
+      <form class='body-form' method="post" action="/form/details">
+
         <div class="form-group">
           <label for="swap"><strong>Looking to swap?</strong></label>
-          <input type="checkbox" name="swap" id="swap" <% if (user.swapping) { %> checked <% } %>>
+          <input type="checkbox" name="swap" id="swap" <% if (it.user.swapping) { %> checked <% } %>>
         </div>
+
+        <div class='form-group'>
+          <label for="room-size"><strong>Room size</strong></label>
+          <select name="room-size" id="room-size" required>
+            <option value="4" <% if (it.user.size === 4) { %> selected <% } %>>4</option>
+            <option value="3"<% if (it.user.size === 3) { %> selected <% } %>>3</option>
+            <option value="2"<% if (it.user.size === 2) { %> selected <% } %>>2</option>
+          </select>
+        </div>
+
+        <div class='form-group'>
+          <label for="ac-type"><strong>AC / Non-AC</strong></label>
+          <select name="ac-type" id="ac-type" required>
+            <option value="AC" <% if (it.user.ac === 1) { %> selected <% } %>>AC</option>
+            <option value="NAC"<% if (it.user.ac === 0) { %> selected <% } %>>NAC</option>
+          </select>
+        </div>
+
 
         <div class="form-group">
           <label for="room-no"><strong>Room Number</strong></label>
-          <input type="number" name="room-no" id="room-no" min="101" required <% if (user.room_no) { %> value="<%= user.room_no %>" <% } %>>
+          <input type="number" name="room-no" id="room-no" min="101" required <% if (it.user.roomNo) { %> value="<%= it.user.roomNo %>" <% } %>>
         </div>
 
-        <% if (!user.firstLogin) { %>
         <div class='form-group'>
-          <strong>Registration number</strong>
-          <span>
-            <%= user.regno %>
-          </span>
+          <label for="reg-no"><strong>Registration Number</strong></label>
+          <input id='reg-no' name='reg-no' type='text' required <% if (!it.user.firstLogin) { %> readonly tabindex='-1' <% } %> value='<%= it.user.regNo ? it.user.regNo: "" %>'>
         </div>
-        <div class='form-group'>
-          <strong>Room size</strong>
-          <span>
-            <%= user.size %>
-          </span>
-        </div>
-        <div class='form-group'>
-          <strong>A/C type</strong>
-          <span>
-            <%= user.ac ? 'AC' : 'Non-AC' %>
-          </span>
-        </div>
-        <% } %>
 
         <div class="form-group submit-group">
           <input type="submit" value="Update">
@@ -94,50 +100,14 @@
       </form>
     </div>
   </details>
-  <% if (user.firstLogin) { %>
-  <div class="modal-back">
-    <div class="card modal-front">
-      <p>
-        You need to set your <strong>room size</strong> and <strong>AC status</strong> to proceed.
-      </p>
-      <p>Note: These cannot be changed once set.</p>
-      <form action="/form/init" method="post" name="initial-login">
-
-        <div class="form-group">
-          <label for="initial-size"><strong>Size</strong></label>
-          <select name="initial-size" id="initial-size" required>
-            <option value="4">4</option>
-            <option value="3">3</option>
-            <option value="2">2</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="reg-no"><strong>Registration no</strong></label>
-          <input type='text' name="reg-no" id='reg-no' required>
-        </div>
-
-        <div class="form-group">
-          <label for="initial-class"><strong>AC or Non-AC</strong></label>
-          <select name="initial-class" id="initial-class" required>
-            <option value="AC">AC</option>
-            <option value="NAC">NAC</option>
-          </select>
-        </div>
-
-        <div class="form-group submit-group">
-          <input type="submit" value="Submit">
-        </div>
-      </form>
-    </div>
-  </div>
   <% } %>
-  <% } %>
-  <h3>Rooms</h3>
-  <details id='#filter-rooms'>
+  <% if (!it.user.loggedIn || (it.user.loggedIn && !it.user.firstLogin)) { %>
+  <h2>Rooms</h2>
+  <details id='filter-rooms'>
     <summary>Filter</summary>
     <div class="body-form-wrapper">
       <form name="search" class='body-form'>
+
         <div class="form-group">
           <label for="room_no">Room No:</label>
           <input type="text" name="room_no">
@@ -160,9 +130,9 @@
       </form>
     </div>
   </details>
-  <div class="row">
-    <% if (Object.keys(available).length > 0) { %>
-    <% for (const [room, users] of Object.entries(available)) { %>
+  <div class="cards">
+    <% if (Object.keys(it.available).length > 0) { %>
+    <% for (const [room, users] of Object.entries(it.available)) { %>
     <div class="card">
       <div class='room-heading'>No. <%= room %></div>
       <div class='room-meta'>
@@ -170,7 +140,7 @@
           <strong><%= users.length %></strong> swapper(s)
           <ul class='room-occupants'>
             <% for (const user of users) { %>
-            <li><%= `${user.name} (${user.reg_no})` %></li>
+            <li><%= `${user.name} (${user.regNo})` %></li>
             <% } %>
           </ul>
         </div>
@@ -184,6 +154,7 @@
     <strong>No rooms available</strong>
     <% } %>
   </div>
+  <% } %>
   <a id="color-switch">🌗</a>
 </body>
 
