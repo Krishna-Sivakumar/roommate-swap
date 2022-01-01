@@ -19,9 +19,6 @@ app.set("views", "./views");
 app.set("view engine", "eta");
 app.engine("eta", eta.renderFile);
 
-// serve static files
-app.use('/public', serveDir('public'));
-
 initSessions(app);
 
 const ALLOWED_ORIGINS_RE = /.*(localhost|roomswap.ml|127.0.0.1).*/;
@@ -31,6 +28,9 @@ app.use(opineCors({
     exposedHeaders: ['X-Powered-By', 'Set-Cookie'],
     origin: ALLOWED_ORIGINS_RE
 }));
+
+// serve static files
+app.use('/public', serveDir('public'));
 
 app.get('/', function home(req, res, next) {
     const authUrl = getAuthUrl(config);

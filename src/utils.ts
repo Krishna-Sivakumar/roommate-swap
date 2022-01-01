@@ -54,6 +54,10 @@ export function getConfigFromEnv(): VswapConfig {
 export function serveDir(dirPath: string) {
     return async function serveStaticDir(req: OpineRequest, res: OpineResponse, next: NextFunction) {
         let p = (req.path).replace(/^\//, '').trim();
+
+        if (req.method !== 'GET') {
+            res.setStatus(405).setHeader('Allow', 'GET').type('text/plain').send('Method not allowed');
+        }
         if (p.endsWith('/')) {
             p = path.join(p, 'index.html');
         }
