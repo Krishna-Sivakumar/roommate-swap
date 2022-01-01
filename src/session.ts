@@ -2,11 +2,11 @@
 import { DB, OpineRequest, OpineResponse, getCookies, Opine } from "./deps.ts";
 import { execute, fetchOptional } from "./utils.ts";
 
-export function initSessions(app: Opine) {
+function init(app: Opine) {
     app.set('session', new SqliteSessionStore());
 }
 
-export function getClientSession(req: OpineRequest, res: OpineResponse) {
+function getClient(req: OpineRequest, res: OpineResponse) {
     let { sid } = getCookies(req.headers);
     const session: SqliteSessionStore = req.app.get('session');
 
@@ -20,12 +20,12 @@ export function getClientSession(req: OpineRequest, res: OpineResponse) {
     return { sid, session };
 }
 
-export function destroySession(res: OpineResponse, sid: string) {
+function destroy(res: OpineResponse, sid: string) {
     res.clearCookie('sid');
     res.app.get('session').drop(sid);
 }
 
-export class SqliteSessionStore {
+class SqliteSessionStore {
     db: DB;
     constructor() {
         this.db = new DB('./sessions.db');
@@ -79,4 +79,8 @@ export class SqliteSessionStore {
     drop(sid: string) {
         execute(this.db, 'DELETE from sessions where id = ?', sid);
     }
+}
+
+export default {
+    init, destroy, getClient
 }

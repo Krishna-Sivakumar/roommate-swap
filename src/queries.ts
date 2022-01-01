@@ -9,7 +9,7 @@ export function initialiseDB() {
     return db;
 }
 
-export function firstLogin(db: DB, email: string) {
+export function isFirstLogin(db: DB, email: string) {
     const result = fetchOptional<(number | null)[]>(db, 'select size, ac from users where email = ?', email);
 
     if (!result) return false;
