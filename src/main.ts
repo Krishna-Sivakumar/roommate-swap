@@ -3,7 +3,7 @@ import { eta, opine, opineCors, urlencoded } from './deps.ts';
 import { getAccessToken, getAuthUrl, getProfileInfo } from "./gauth.ts";
 import { info } from "./logging.ts";
 import { isFirstLogin, getSwappingUsers, getUserDetails, initialiseDB } from "./queries.ts";
-import sessions from "./session.ts";
+import sessions from "./sessions.ts";
 import { execute, getConfigFromEnv, serveDir } from "./utils.ts";
 
 const config = getConfigFromEnv();
