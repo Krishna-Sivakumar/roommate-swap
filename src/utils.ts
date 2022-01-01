@@ -1,4 +1,4 @@
-import { DB, Row } from "./deps.ts";
+import { DB, ExtMapping, NextFunction, OpineRequest, OpineResponse, path, Row } from "./deps.ts";
 import { error } from "./logging.ts";
 
 export function scream(code: number, ...data: unknown[]) {
@@ -49,4 +49,30 @@ export function getConfigFromEnv(): VswapConfig {
     return {
         port, clientId, clientSecret, rootUri, redirectUris
     };
+}
+
+export function serveDir(dirPath: string) {
+    return async function serveStaticDir(req: OpineRequest, res: OpineResponse, next: NextFunction) {
+        let p = (req.path).replace(/^\//, '').trim();
+        if (p.endsWith('/')) {
+            p = path.join(p, 'index.html');
+        }
+        try {
+            const finalPath = path.join(dirPath, p);
+            const extension = path.extname(finalPath);
+            res.setStatus(200)
+                .type(ExtMapping[extension][0] || 'text/plain')
+                .send(await Deno.readFile(finalPath));
+        }
+        catch (e) {
+            if (e instanceof Deno.errors.NotFound) {
+                res.setStatus(404);
+            }
+            else {
+                res.setStatus(500);
+            }
+            res.type('text/plain').send(e);
+        }
+        next()
+    }
 }

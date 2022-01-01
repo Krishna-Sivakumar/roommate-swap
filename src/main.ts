@@ -1,10 +1,10 @@
 // deno-lint-ignore-file no-explicit-any
-import { eta, opine, opineCors, serveStatic, urlencoded } from './deps.ts';
+import { eta, opine, opineCors, urlencoded } from './deps.ts';
 import { getAccessToken, getAuthUrl, getProfileInfo } from "./gauth.ts";
 import { info } from "./logging.ts";
 import { firstLogin, getSwappingUsers, getUserDetails, initialiseDB } from "./queries.ts";
 import { getClientSession, initSessions } from "./session.ts";
-import { execute, getConfigFromEnv } from "./utils.ts";
+import { execute, getConfigFromEnv, serveDir } from "./utils.ts";
 
 const config = getConfigFromEnv();
 const db = initialiseDB();
@@ -20,7 +20,7 @@ app.set("view engine", "eta");
 app.engine("eta", eta.renderFile);
 
 // serve static files
-app.use(serveStatic('public'));
+app.use('/public', serveDir('public'));
 
 initSessions(app);
 
