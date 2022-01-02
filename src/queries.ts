@@ -27,3 +27,69 @@ export function getSwappingUsers(db: Database) {
 export function getUserDetails(db: Database, key: string) {
     return fetchOptional(db, "SELECT * FROM users WHERE email = ?", key)!;
 }
+
+export function filterUsers(db: Database, options: { [key: string]: string | number}): [Record<string, any>[], string] {
+    /*
+        Filters users based on query parameters.
+
+        options:
+            reg_no: prefix match of registration number (overrides all other parameters)
+            room_no: prefix match of room number (overrides everything except reg_no)
+            size: match of room sizes between size_min and size_max
+            floor: match of rooms in floors between floor_min and floor_max
+            ac: match of rooms with AC or Non-AC
+    */
+
+    let result;
+
+    const status_messages = {
+        reg_no: "No rooms with the queried registration number found.",
+        room_no: "No rooms with the queried room number found.",
+        others: "No rooms with the queried parameters found.",
+        success: ""
+    }
+
+    let search_status = status_messages.success;
+
+    if (options.reg_no) {
+        result = db.queryObject(
+            "SELECT name, reg_no, room_no, size, ac FROM users WHERE reg_no LIKE ?",
+            options.reg_no + "%"
+        );
+
+        if (result.length == 0)
+            search_status = status_messages.reg_no;
+
+    } else if (options.room_no) {
+        result = db.queryObject(
+            "SELECT name, reg_no, room_no, size, ac FROM users where room_no LIKE ?",
+            options.room_no + "%"
+        );
+
+        if (result.length == 0)
+            search_status = status_messages.room_no;
+
+    } else {
+        const isAC = (options.ac_type == "AC")? 1 : 0;
+
+        const floorMax = (options.floor_max as number + 1) * 100 - 1;
+        const floorMin = Math.min((options.floor_min as number) * 100, floorMax);
+
+        const sizeMax = (options.size_max as number);
+        const sizeMin = Math.min((options.size_min as number), sizeMax);
+
+        result = db.queryObject(
+            "SELECT name, reg_no, room_no, size, ac FROM users WHERE ac = ? AND (room_no BETWEEN ? AND ?) AND (size BETWEEN ? AND ?)",
+            isAC,
+            floorMin,
+            floorMax,
+            sizeMin,
+            sizeMax
+        );
+
+        if (result.length == 0)
+            search_status = status_messages.others;
+    }
+
+    return [result, search_status];
+}

@@ -2,7 +2,7 @@
 import { eta, opine, serveStatic, opineCors, urlencoded } from './deps.ts';
 import { getAccessToken, getAuthUrl, getProfileInfo } from "./gauth.ts";
 import { info } from "./logging.ts";
-import { isFirstLogin, getSwappingUsers, getUserDetails, initialiseDB } from "./queries.ts";
+import { isFirstLogin, getSwappingUsers, getUserDetails, initialiseDB, filterUsers } from "./queries.ts";
 import sessions from "./sessions.ts";
 import { getConfigFromEnv, ALLOWED_ORIGINS_RE } from "./utils.ts";
 
@@ -51,7 +51,19 @@ app.get('/', function home(req, res, next) {
         }
     }
 
-    const users = getSwappingUsers(db);
+    let users:Record<string, any>[];
+    let search_status = "";
+
+    if ("filter" in req.query) {
+        const cleanedForm = Object.entries(req.query).reduce((prev: {[index:string]: any}, [key, val]) => {
+            if (val) prev[key] = val;
+            return prev;
+        }, {});
+        [users, search_status] = filterUsers(db, cleanedForm);
+    } else {
+        users = getSwappingUsers(db);
+    }
+
     const grouped: Record<number, any[]> = {};
 
     for (const user of users) {
@@ -60,7 +72,7 @@ app.get('/', function home(req, res, next) {
     }
 
     const ctx = {
-        authUrl, user, available: grouped
+        authUrl, user, available: grouped, search_status: search_status
     };
 
     eta.renderFile('index.eta', ctx, { views: "./views" }, (err, html) => {

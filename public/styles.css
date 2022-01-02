@@ -85,7 +85,7 @@ input, select {
   font-family: var(--font);
 }
 
-input:not([type='checkbox']):not([type='submit']), select {
+input:not([type='checkbox']):not([type='submit']):not([type='number']), select {
   min-width: 15ch;
 }
 
@@ -188,6 +188,13 @@ input[type='submit'], select, input[type='checkbox'] {
 .form-group.submit-group {
   margin-top: 1rem;
   justify-content: flex-end;
+}
+
+.range-group {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  min-width: 10ch;
 }
 
 #swap {
