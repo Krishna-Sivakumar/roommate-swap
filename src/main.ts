@@ -1,10 +1,10 @@
 // deno-lint-ignore-file no-explicit-any
-import { eta, opine, opineCors, urlencoded } from './deps.ts';
+import { eta, opine, serveStatic, opineCors, urlencoded } from './deps.ts';
 import { getAccessToken, getAuthUrl, getProfileInfo } from "./gauth.ts";
 import { info } from "./logging.ts";
 import { isFirstLogin, getSwappingUsers, getUserDetails, initialiseDB } from "./queries.ts";
 import sessions from "./sessions.ts";
-import { execute, getConfigFromEnv, serveDir } from "./utils.ts";
+import { execute, getConfigFromEnv, ALLOWED_ORIGINS_RE } from "./utils.ts";
 
 const config = getConfigFromEnv();
 const db = initialiseDB();
@@ -21,8 +21,6 @@ app.engine("eta", eta.renderFile);
 
 sessions.init(app);
 
-const ALLOWED_ORIGINS_RE = /.*(localhost|roomswap.ml|127.0.0.1).*/;
-
 app.use(opineCors({
     credentials: true,
     exposedHeaders: ['X-Powered-By', 'Set-Cookie'],
@@ -30,7 +28,7 @@ app.use(opineCors({
 }));
 
 // serve static files
-app.use('/public', serveDir('public'));
+app.use('/public', serveStatic('public'));
 
 app.get('/', function home(req, res, next) {
     const authUrl = getAuthUrl(config);
