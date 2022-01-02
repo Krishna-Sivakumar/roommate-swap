@@ -1,10 +1,10 @@
 // deno-lint-ignore-file no-explicit-any
-import { eta, opine, opineCors, urlencoded } from './deps.ts';
+import { eta, opine, serveStatic, opineCors, urlencoded } from './deps.ts';
 import { getAccessToken, getAuthUrl, getProfileInfo } from "./gauth.ts";
 import { info } from "./logging.ts";
-import { firstLogin, getSwappingUsers, getUserDetails, initialiseDB } from "./queries.ts";
-import { getClientSession, initSessions } from "./session.ts";
-import { execute, getConfigFromEnv, serveDir } from "./utils.ts";
+import { isFirstLogin, getSwappingUsers, getUserDetails, initialiseDB } from "./queries.ts";
+import sessions from "./sessions.ts";
+import { getConfigFromEnv, ALLOWED_ORIGINS_RE } from "./utils.ts";
 
 const config = getConfigFromEnv();
 const db = initialiseDB();
@@ -19,9 +19,7 @@ app.set("views", "./views");
 app.set("view engine", "eta");
 app.engine("eta", eta.renderFile);
 
-initSessions(app);
-
-const ALLOWED_ORIGINS_RE = /.*(localhost|roomswap.ml|127.0.0.1).*/;
+sessions.init(app);
 
 app.use(opineCors({
     credentials: true,
@@ -30,13 +28,13 @@ app.use(opineCors({
 }));
 
 // serve static files
-app.use('/public', serveDir('public'));
+app.use('/public', serveStatic('public'));
 
 app.get('/', function home(req, res, next) {
     const authUrl = getAuthUrl(config);
 
-    const { sid, session } = getClientSession(req, res);
-    const email = session.get<string>(sid, 'email');
+    const session = sessions.getClient(req, res);
+    const email = session.get<string>('email');
 
     const user: Record<string, any> = {
         loggedIn: false
@@ -44,8 +42,8 @@ app.get('/', function home(req, res, next) {
 
     if (email) {
         user.loggedIn = true;
-        user.firstLogin = firstLogin(db, email);
-        user.name = session.get<string>(sid, 'name');
+        user.firstLogin = isFirstLogin(db, email);
+        user.name = session.get<string>('name');
         const details = getUserDetails(db, email);
 
         if (!user.firstLogin) {
@@ -57,8 +55,8 @@ app.get('/', function home(req, res, next) {
     const grouped: Record<number, any[]> = {};
 
     for (const user of users) {
-        grouped[user.roomNo] = grouped[user.roomNo] || [];
-        grouped[user.roomNo].push(user);
+        grouped[user.room_no] = grouped[user.room_no] || [];
+        grouped[user.room_no].push(user);
     }
 
     const ctx = {
@@ -81,11 +79,11 @@ app.get('/auth/google', async function gauth(req, res, next) {
     const token = await getAccessToken(config, authCode);
     const userInfo = await getProfileInfo(token);
 
-    const { sid, session } = getClientSession(req, res);
-    session.set(sid, 'email', userInfo.email);
-    session.set(sid, 'name', userInfo.given_name);
+    const session = sessions.getClient(req, res);
+    session.set('email', userInfo.email);
+    session.set('name', userInfo.given_name);
 
-    execute(db, "INSERT OR IGNORE INTO users(email, name) VALUES(?, ?)", userInfo.email, userInfo.given_name);
+    db.execute("INSERT OR IGNORE INTO users(email, name) VALUES(?, ?)", userInfo.email, userInfo.given_name);
     info(`${userInfo.email} logged in at ${new Date()}`);
 
     res.redirect('/');
@@ -93,38 +91,22 @@ app.get('/auth/google', async function gauth(req, res, next) {
 })
 
 app.get('/auth/logout', function logout(req, res) {
-    const { sid, session } = getClientSession(req, res);
-    session.clear(sid);
+    const session = sessions.getClient(req, res);
+    session.clear();
     res.redirect('/');
 });
 
 app.post("/form/details", function swap(req, res, next) {
-    const { sid, session } = getClientSession(req, res);
+    const session = sessions.getClient(req, res);
 
-    const email = session.get<string>(sid, 'email')!;
-    execute(db, 'update users set swap = ?, ac = ?, reg_no = ?, room_no = ?, size = ? where email = ?;',
+    const email = session.get<string>('email')!;
+    db.execute('update users set swap = ?, ac = ?, reg_no = ?, room_no = ?, size = ? where email = ?;',
         req.body['swap'] === 'on',
         req.body['ac-type'] === 'AC',
         new String(req.body['reg-no']).toUpperCase(),
         req.body['room-no'],
         req.body['room-size'],
         email
-    );
-
-    res.redirect("/");
-    next();
-})
-
-app.post("/form/init", function initialLogin(req, res, next) {
-    const { sid, session } = getClientSession(req, res);
-    const email = session.get<string>(sid, 'email')!;
-
-    const ac = req.body["initial-class"] == "AC" ? 1 : 0;
-
-    execute(
-        db,
-        "UPDATE users SET size = ?, ac = ?, reg_no = ? WHERE email = ?;",
-        req.body["initial-size"], ac, req.body["reg-no"], email
     );
 
     res.redirect("/");

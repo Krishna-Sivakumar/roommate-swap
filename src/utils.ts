@@ -1,4 +1,4 @@
-import { DB, ExtMapping, NextFunction, OpineRequest, OpineResponse, path, Row } from "./deps.ts";
+import { Database } from "./deps.ts";
 import { error } from "./logging.ts";
 
 export function scream(code: number, ...data: unknown[]) {
@@ -7,19 +7,10 @@ export function scream(code: number, ...data: unknown[]) {
     Deno.exit(code);
 }
 
-export function execute(db: DB, query: string, ...params: (string | boolean | number)[]) {
-    db.query(query, params);
-}
-
-export function fetchOptional<T extends Row>(db: DB, query: string, ...params: (string | boolean | number)[]): T | null {
-    const result = fetchMany<T>(db, query, ...params);
+export function fetchOptional(db: Database, query: string, ...params: (string | boolean | number)[]) {
+    const result = db.queryObject(query, ...params);
     if (result.length === 0) return null;
     return result[0];
-}
-
-export function fetchMany<T extends Row>(db: DB, query: string, ...params: (string | boolean | number)[]): T[] {
-    const result = db.query<T>(query, params);
-    return result;
 }
 
 export interface VswapConfig {
@@ -51,32 +42,4 @@ export function getConfigFromEnv(): VswapConfig {
     };
 }
 
-export function serveDir(dirPath: string) {
-    return async function serveStaticDir(req: OpineRequest, res: OpineResponse, next: NextFunction) {
-        let p = (req.path).replace(/^\//, '').trim();
-
-        if (req.method !== 'GET') {
-            res.setStatus(405).setHeader('Allow', 'GET').type('text/plain').send('Method not allowed');
-        }
-        if (p.endsWith('/')) {
-            p = path.join(p, 'index.html');
-        }
-        try {
-            const finalPath = path.join(dirPath, p);
-            const extension = path.extname(finalPath);
-            res.setStatus(200)
-                .type(ExtMapping[extension][0] || 'text/plain')
-                .send(await Deno.readFile(finalPath));
-        }
-        catch (e) {
-            if (e instanceof Deno.errors.NotFound) {
-                res.setStatus(404);
-            }
-            else {
-                res.setStatus(500);
-            }
-            res.type('text/plain').send(e);
-        }
-        next()
-    }
-}
+export const ALLOWED_ORIGINS_RE = /.*(localhost|roomswap.ml|127.0.0.1).*/;

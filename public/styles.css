@@ -255,10 +255,6 @@ details:not([open]) {
   }
 }
 
-.room-heading {
-  font-weight: bold;
-}
-
 .room-meta {
   margin-left: 0.5rem;
 }

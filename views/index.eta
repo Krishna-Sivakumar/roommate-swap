@@ -63,7 +63,7 @@
 
         <div class="form-group">
           <label for="swap"><strong>Looking to swap?</strong></label>
-          <input type="checkbox" name="swap" id="swap" <% if (it.user.swapping) { %> checked <% } %>>
+          <input type="checkbox" name="swap" id="swap" <% if (it.user.swap) { %> checked <% } %>>
         </div>
 
         <div class='form-group'>
@@ -86,12 +86,12 @@
 
         <div class="form-group">
           <label for="room-no"><strong>Room Number</strong></label>
-          <input type="number" name="room-no" id="room-no" min="101" required <% if (it.user.roomNo) { %> value="<%= it.user.roomNo %>" <% } %>>
+          <input type="number" name="room-no" id="room-no" min="101" required <% if (it.user.room_no) { %> value="<%= it.user.room_no %>" <% } %>>
         </div>
 
         <div class='form-group'>
           <label for="reg-no"><strong>Registration Number</strong></label>
-          <input id='reg-no' name='reg-no' type='text' required <% if (!it.user.firstLogin) { %> readonly tabindex='-1' <% } %> value='<%= it.user.regNo ? it.user.regNo: "" %>'>
+          <input id='reg-no' name='reg-no' type='text' required <% if (!it.user.firstLogin) { %> readonly tabindex='-1' <% } %> value='<%= it.user.reg_no ? it.user.reg_no: "" %>'>
         </div>
 
         <div class="form-group submit-group">
@@ -134,18 +134,24 @@
     <% if (Object.keys(it.available).length > 0) { %>
     <% for (const [room, users] of Object.entries(it.available)) { %>
     <div class="card">
-      <div class='room-heading'>No. <%= room %></div>
+      <div class='room-heading'>
+        No. <strong><%= room %></strong>
+        (<strong><%= users[0].size %></strong>-bed, <strong><%= users[0].ac ? 'AC' : 'Non-AC' %></strong>)
+      </div>
       <div class='room-meta'>
         <div>
           <strong><%= users.length %></strong> swapper(s)
           <ul class='room-occupants'>
             <% for (const user of users) { %>
-            <li><%= `${user.name} (${user.regNo})` %></li>
+            <li>
+              <strong><%= `${user.name}`%></strong>
+              <%= it.user.loggedIn ? `(${user.reg_no})`: '' %>
+              </li>
             <% } %>
           </ul>
         </div>
         <div>
-          <strong><%= users[0].size %></strong>-bed, <strong><%= users[0].ac ? 'AC' : 'Non-AC' %></strong>
+          
         </div>
       </div>
     </div>

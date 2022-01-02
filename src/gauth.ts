@@ -47,16 +47,3 @@ export function getAuthUrl(config: VswapConfig) {
 
     return url.toString();
 }
-
-export async function isAuthTokenValid(accessToken: string) {
-    try {
-        const url = new URL('https://www.googleapis.com/oauth2/v3/userinfo');
-        url.searchParams.set('access_token', accessToken);
-        const res = await fetch(url.toString());
-
-        return res.ok;
-    }
-    catch {
-        return false;
-    }
-}
