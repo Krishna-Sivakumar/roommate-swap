@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
-import { DB, OpineRequest, OpineResponse, getCookies, Opine } from "./deps.ts";
-import { execute, fetchOptional } from "./utils.ts";
+import { Database, OpineRequest, OpineResponse, getCookies, Opine } from "./deps.ts";
+import { fetchOptional } from "./utils.ts";
 
 function init(app: Opine) {
     app.set('session', new SqliteSessionStore());
@@ -56,33 +56,34 @@ class ClientSession {
 }
 
 class SqliteSessionStore {
-    db: DB;
+    db: Database;
     constructor() {
-        this.db = new DB('./sessions.db');
-        execute(this.db, 'CREATE TABLE IF NOT EXISTS sessions(id TEXT UNIQUE NOT NULL, data TEXT not null);');
+        this.db = new Database('./sessions.db');
+        this.db.execute("pragma journal_mode = WAL");
+        this.db.execute('CREATE TABLE IF NOT EXISTS sessions(id TEXT UNIQUE NOT NULL, data TEXT not null);');
     }
 
     createSession() {
         const id = crypto.randomUUID();
-        execute(this.db, 'insert into sessions(id, data) VALUES(?, ?);', id, '{}');
+        this.db.execute('insert into sessions(id, data) VALUES(?, ?);', id, '{}');
         return id;
     }
 
     getSession(sid: string) {
-        const data = fetchOptional<string[]>(this.db, 'SELECT data FROM sessions WHERE id = ?', sid);
+        const res = fetchOptional(this.db, 'SELECT data FROM sessions WHERE id = ?', sid);
         let parsed: Record<string, any>;
-        if (data) {
-            parsed = JSON.parse(data[0] || '{}');
+        if (res) {
+            parsed = JSON.parse(res.data || '{}');
         }
         else {
-            execute(this.db, 'INSERT INTO sessions(id, data) VALUES(?, ?);', sid, '{}');
+            this.db.execute('INSERT INTO sessions(id, data) VALUES(?, ?);', sid, '{}');
             parsed = {};
         }
         return parsed;
     }
 
     persist(sid: string, data: Record<string, any>) {
-        execute(this.db, 'UPDATE sessions SET data = ? WHERE id = ?;', JSON.stringify(data), sid);
+        this.db.execute('UPDATE sessions SET data = ? WHERE id = ?;', JSON.stringify(data), sid);
     }
 
     get<T>(sid: string, key: string): T | null {
@@ -103,11 +104,11 @@ class SqliteSessionStore {
     }
 
     clear(sid: string) {
-        execute(this.db, 'UPDATE sessions SET data = ? where id = ?', '{}', sid);
+        this.db.execute('UPDATE sessions SET data = ? where id = ?', '{}', sid);
     }
 
     drop(sid: string) {
-        execute(this.db, 'DELETE from sessions where id = ?', sid);
+        this.db.execute('DELETE from sessions where id = ?', sid);
     }
 }
 

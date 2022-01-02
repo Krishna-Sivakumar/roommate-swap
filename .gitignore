@@ -1,5 +1,7 @@
 build/
 *.db
+*.db-shm
+*.db-wal
 node_modules/
 .env
 .env.test

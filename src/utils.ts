@@ -1,4 +1,4 @@
-import { DB, Row } from "./deps.ts";
+import { Database } from "./deps.ts";
 import { error } from "./logging.ts";
 
 export function scream(code: number, ...data: unknown[]) {
@@ -7,19 +7,10 @@ export function scream(code: number, ...data: unknown[]) {
     Deno.exit(code);
 }
 
-export function execute(db: DB, query: string, ...params: (string | boolean | number)[]) {
-    db.query(query, params);
-}
-
-export function fetchOptional<T extends Row>(db: DB, query: string, ...params: (string | boolean | number)[]): T | null {
-    const result = fetchMany<T>(db, query, ...params);
+export function fetchOptional(db: Database, query: string, ...params: (string | boolean | number)[]) {
+    const result = db.queryObject(query, ...params);
     if (result.length === 0) return null;
     return result[0];
-}
-
-export function fetchMany<T extends Row>(db: DB, query: string, ...params: (string | boolean | number)[]): T[] {
-    const result = db.query<T>(query, params);
-    return result;
 }
 
 export interface VswapConfig {

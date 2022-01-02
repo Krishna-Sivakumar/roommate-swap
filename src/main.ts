@@ -4,7 +4,7 @@ import { getAccessToken, getAuthUrl, getProfileInfo } from "./gauth.ts";
 import { info } from "./logging.ts";
 import { isFirstLogin, getSwappingUsers, getUserDetails, initialiseDB } from "./queries.ts";
 import sessions from "./sessions.ts";
-import { execute, getConfigFromEnv, ALLOWED_ORIGINS_RE } from "./utils.ts";
+import { getConfigFromEnv, ALLOWED_ORIGINS_RE } from "./utils.ts";
 
 const config = getConfigFromEnv();
 const db = initialiseDB();
@@ -55,8 +55,8 @@ app.get('/', function home(req, res, next) {
     const grouped: Record<number, any[]> = {};
 
     for (const user of users) {
-        grouped[user.roomNo] = grouped[user.roomNo] || [];
-        grouped[user.roomNo].push(user);
+        grouped[user.room_no] = grouped[user.room_no] || [];
+        grouped[user.room_no].push(user);
     }
 
     const ctx = {
@@ -83,7 +83,7 @@ app.get('/auth/google', async function gauth(req, res, next) {
     session.set('email', userInfo.email);
     session.set('name', userInfo.given_name);
 
-    execute(db, "INSERT OR IGNORE INTO users(email, name) VALUES(?, ?)", userInfo.email, userInfo.given_name);
+    db.execute("INSERT OR IGNORE INTO users(email, name) VALUES(?, ?)", userInfo.email, userInfo.given_name);
     info(`${userInfo.email} logged in at ${new Date()}`);
 
     res.redirect('/');
@@ -100,7 +100,7 @@ app.post("/form/details", function swap(req, res, next) {
     const session = sessions.getClient(req, res);
 
     const email = session.get<string>('email')!;
-    execute(db, 'update users set swap = ?, ac = ?, reg_no = ?, room_no = ?, size = ? where email = ?;',
+    db.execute('update users set swap = ?, ac = ?, reg_no = ?, room_no = ?, size = ? where email = ?;',
         req.body['swap'] === 'on',
         req.body['ac-type'] === 'AC',
         new String(req.body['reg-no']).toUpperCase(),
