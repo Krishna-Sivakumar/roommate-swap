@@ -41,6 +41,10 @@ a {
   text-decoration: underline;
 }
 
+option {
+  color: black;
+}
+
 #logo-link, #color-switch {
   text-decoration: none;
 }
