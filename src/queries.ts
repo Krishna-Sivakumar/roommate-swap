@@ -1,5 +1,5 @@
 import { Database } from "./deps.ts";
-import { fetchOptional } from "./utils.ts";
+import { fetchOptional, filterParams } from "./utils.ts";
 
 export function initialiseDB() {
     const db = new Database('./vswap.db');
