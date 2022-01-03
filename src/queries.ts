@@ -17,7 +17,7 @@ export function isFirstLogin(db: Database, email: string) {
 
 export function getSwappingUsers(db: Database) {
     return db.queryObject(`
-        select name, reg_no, room_no, size, ac
+        select name, reg_no, room_no, size, ac, block
         from users
         where swap = 1
         order by room_no;
@@ -59,7 +59,7 @@ export function filterUsers(db: Database, options: {[index: string]: string | nu
 
     if (options.reg_no) {
         result = db.queryObject(
-            "SELECT name, reg_no, room_no, size, ac FROM users WHERE reg_no LIKE ? AND swap = 1",
+            "SELECT name, reg_no, room_no, size, ac, block FROM users WHERE reg_no LIKE ? AND swap = 1",
             options.reg_no + "%"
         );
 
@@ -68,8 +68,9 @@ export function filterUsers(db: Database, options: {[index: string]: string | nu
 
     } else if (options.room_no) {
         result = db.queryObject(
-            "SELECT name, reg_no, room_no, size, ac FROM users where room_no LIKE ? AND swap = 1",
-            options.room_no + "%"
+            "SELECT name, reg_no, room_no, size, ac, block FROM users where room_no LIKE ? AND block = ? AND swap = 1",
+            options.room_no + "%",
+            options.block
         );
 
         if (result.length == 0)
@@ -84,13 +85,16 @@ export function filterUsers(db: Database, options: {[index: string]: string | nu
         const sizeMax = (options.size_max as number);
         const sizeMin = Math.min((options.size_min as number), sizeMax);
 
+        const block = options.block;
+
         result = db.queryObject(
-            "SELECT name, reg_no, room_no, size, ac FROM users WHERE ac = ? AND (room_no BETWEEN ? AND ?) AND (size BETWEEN ? AND ?) AND swap = 1",
+            "SELECT name, reg_no, room_no, size, ac, block FROM users WHERE ac = ? AND (room_no BETWEEN ? AND ?) AND (size BETWEEN ? AND ?) AND block = ? AND swap = 1",
             isAC,
             floorMin,
             floorMax,
             sizeMin,
-            sizeMax
+            sizeMax,
+            block
         );
 
         if (result.length == 0)

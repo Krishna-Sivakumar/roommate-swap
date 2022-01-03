@@ -181,7 +181,7 @@
     <% for (const [room, users] of Object.entries(it.available)) { %>
     <div class="card">
       <div class='room-heading'>
-        No. <strong><%= room %></strong>
+        Block <strong><%= room[room.length-1] %></strong>, No. <strong><%= room.substring(0, room.length-1) %></strong>
         (<strong><%= users[0].size %></strong>-bed, <strong><%= users[0].ac ? 'AC' : 'Non-AC' %></strong>)
       </div>
       <div class='room-meta'>

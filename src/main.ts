@@ -67,8 +67,8 @@ app.get('/', function home(req, res, next) {
     const grouped: Record<number, any[]> = {};
 
     for (const user of users) {
-        grouped[user.room_no] = grouped[user.room_no] || [];
-        grouped[user.room_no].push(user);
+        grouped[user.room_no+user.block] = grouped[user.room_no+user.block] || [];
+        grouped[user.room_no+user.block].push(user);
     }
 
     const ctx = {
