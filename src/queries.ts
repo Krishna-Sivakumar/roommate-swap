@@ -4,7 +4,7 @@ import { fetchOptional } from "./utils.ts";
 export function initialiseDB() {
     const db = new Database('./vswap.db');
     db.execute("pragma journal_mode = WAL");
-    db.execute("CREATE TABLE IF NOT EXISTS users(email TEXT PRIMARY KEY, name TEXT, reg_no TEXT, room_no INTEGER, size INTEGER, ac INTEGER, swap INT DEFAULT 0);");
+    db.execute("CREATE TABLE IF NOT EXISTS users(email TEXT PRIMARY KEY, name TEXT, reg_no TEXT, room_no INTEGER, size INTEGER, ac INTEGER, swap INT DEFAULT 0, block TEXT);");
     return db;
 }
 
