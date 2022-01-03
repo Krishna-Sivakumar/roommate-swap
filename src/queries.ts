@@ -9,10 +9,10 @@ export function initialiseDB() {
 }
 
 export function isFirstLogin(db: Database, email: string) {
-    const result = fetchOptional(db, 'select size, ac from users where email = ?', email);
+    const result = fetchOptional(db, 'select size, ac, block from users where email = ?', email);
 
     if (!result) return false;
-    return (result.size == null || result.ac == null);
+    return (result.size == null || result.ac == null, result.block == null);
 }
 
 export function getSwappingUsers(db: Database) {

@@ -112,12 +112,13 @@ app.post("/form/details", function swap(req, res, next) {
     const session = sessions.getClient(req, res);
 
     const email = session.get<string>('email')!;
-    db.execute('update users set swap = ?, ac = ?, reg_no = ?, room_no = ?, size = ? where email = ?;',
+    db.execute('update users set swap = ?, ac = ?, reg_no = ?, room_no = ?, size = ?, block = ? where email = ?;',
         req.body['swap'] === 'on',
         req.body['ac-type'] === 'AC',
         new String(req.body['reg-no']).toUpperCase(),
         req.body['room-no'],
         req.body['room-size'],
+        req.body['block'],
         email
     );
 
