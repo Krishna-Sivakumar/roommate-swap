@@ -59,7 +59,7 @@ export function filterUsers(db: Database, options: {[index: string]: string | nu
 
     if (options.reg_no) {
         result = db.queryObject(
-            "SELECT name, reg_no, room_no, size, ac FROM users WHERE reg_no LIKE ?",
+            "SELECT name, reg_no, room_no, size, ac FROM users WHERE reg_no LIKE ? AND swap = 1",
             options.reg_no + "%"
         );
 
@@ -68,7 +68,7 @@ export function filterUsers(db: Database, options: {[index: string]: string | nu
 
     } else if (options.room_no) {
         result = db.queryObject(
-            "SELECT name, reg_no, room_no, size, ac FROM users where room_no LIKE ?",
+            "SELECT name, reg_no, room_no, size, ac FROM users where room_no LIKE ? AND swap = 1",
             options.room_no + "%"
         );
 
@@ -85,7 +85,7 @@ export function filterUsers(db: Database, options: {[index: string]: string | nu
         const sizeMin = Math.min((options.size_min as number), sizeMax);
 
         result = db.queryObject(
-            "SELECT name, reg_no, room_no, size, ac FROM users WHERE ac = ? AND (room_no BETWEEN ? AND ?) AND (size BETWEEN ? AND ?)",
+            "SELECT name, reg_no, room_no, size, ac FROM users WHERE ac = ? AND (room_no BETWEEN ? AND ?) AND (size BETWEEN ? AND ?) AND swap = 1",
             isAC,
             floorMin,
             floorMax,
