@@ -1,5 +1,5 @@
 import { Database } from "./deps.ts";
-import { fetchOptional } from "./utils.ts";
+import { fetchOptional, filterParams } from "./utils.ts";
 
 export function initialiseDB() {
     const db = new Database('./vswap.db');
@@ -28,17 +28,23 @@ export function getUserDetails(db: Database, key: string) {
     return fetchOptional(db, "SELECT * FROM users WHERE email = ?", key)!;
 }
 
-export function filterUsers(db: Database, options: { [key: string]: string | number}): [Record<string, any>[], string] {
-    /*
-        Filters users based on query parameters.
-
-        options:
-            reg_no: prefix match of registration number (overrides all other parameters)
-            room_no: prefix match of room number (overrides everything except reg_no)
-            size: match of room sizes between size_min and size_max
-            floor: match of rooms in floors between floor_min and floor_max
-            ac: match of rooms with AC or Non-AC
-    */
+/**
+*   Filters users from the 'user' table based on a list of parameters.
+*
+*   @param db: database instance to query.
+*   @param options: list of parameters to filter users with.
+*
+*   Following is the role of each parameter:
+*
+*   - `reg_no`: prefix match of registration number (overrides all other parameters)
+*   - `room_no`: prefix match of room number (overrides everything except reg_no)
+*   - `size_min` and `size_max`: match of room sizes between size_min and size_max
+*   - `floor_min` and `floor_max`: match of rooms in floors between floor_min and floor_max
+*   - `ac_type`: match of rooms with AC or Non-AC
+*
+*   @returns A 2-tuple encapsulating the filtered rows and the result status message.
+*/
+export function filterUsers(db: Database, options: {[index: string]: string | number}): [Record<string, any>[], string] {
 
     let result;
 
